@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify stage 1 foundation
+    name: Verify mini program
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:

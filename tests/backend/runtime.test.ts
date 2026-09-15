@@ -47,6 +47,7 @@ describe('SDK-backed runtime wiring (isolated SDK test double)', () => {
     if (!first.success || !second.success) throw new Error('Expected valid runtime response');
     expect(parseLoginResult(first.data)).toEqual(parseLoginResult(second.data));
     expect(sdk.init).toHaveBeenCalledExactlyOnceWith({ env: 'test_runtime_environment' });
+    expect(sdk.database).toHaveBeenCalledWith({ throwOnNotFound: false });
     expect(add).toHaveBeenCalledOnce();
     expect(records[0]?.openid).toBe('test_runtime_trusted');
   });

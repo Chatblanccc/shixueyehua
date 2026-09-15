@@ -27,7 +27,9 @@
     "devtools:build-npm": "tsx scripts/devtools.ts build-npm",
     "devtools:open": "tsx scripts/devtools.ts open",
     "devtools:verify": "tsx scripts/verify-devtools.ts",
-    "verify:stage1": "npm run verify && npm run format:check && npm run check:cloud && npm run db:init -- --dry-run && npm run db:bootstrap-admin -- --dry-run && npm audit --omit=dev && npm --prefix miniprogram audit --omit=dev && npm run devtools:verify"
+    "verify:stage1": "npm run verify && npm run format:check && npm run check:cloud && npm run db:init -- --dry-run && npm run db:bootstrap-admin -- --dry-run && npm audit --omit=dev && npm --prefix miniprogram audit --omit=dev && npm run devtools:verify",
+    "devtools:verify:stage2": "tsx scripts/verify-devtools.ts --stage2",
+    "verify:stage2": "npm run verify && npm run format:check && npm run check:cloud && npm run db:init -- --dry-run && npm run db:bootstrap-admin -- --dry-run && npm audit --omit=dev && npm --prefix miniprogram audit --omit=dev && npm run devtools:verify:stage2"
   },
   "dependencies": {
     "wx-server-sdk": "4.0.2",

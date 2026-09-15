@@ -1,5 +1,5 @@
 import { observable } from 'mobx-miniprogram';
-import type { ErrorCode, OnboardingStep, UserProfile } from '../generated/shared';
+import type { CurrentClass, ErrorCode, OnboardingStep, UserProfile } from '../generated/shared';
 import { environment } from '../config/env';
 
 export function createUserStore(previewMode = false) {
@@ -10,6 +10,11 @@ export function createUserStore(previewMode = false) {
     errorCode: '' as ErrorCode | '',
     onboardingStep: 'identity' as OnboardingStep,
     previewMode,
+    currentClass: null as CurrentClass | null,
+    classLoading: false,
+    classError: '',
+    // Pages observe this revision to discard data from the previous class scope.
+    scopeRevision: 0,
     get isOnboarded(): boolean {
       return this.user !== null && this.onboardingStep === 'ready';
     },

@@ -1,15 +1,61 @@
 <view class="page selection-page">
   <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
-  <view class="step-track"><text>01 选择身份</text><view class="step-line"></view><text class="current">02 找到班级</text></view>
+  <view wx:if="{{!switchMode}}" class="step-track"><text>01 选择身份</text><view class="step-line"></view><text class="current">02 找到班级</text></view>
   <text class="eyebrow">每一个人，都有所归属</text>
-  <text class="page-title">找到你的班级</text>
-  <text class="page-description">学校、年级、班级，连接你与校园的日常。</text>
+  <text class="page-title">{{switchMode ? '找到新的班级' : '找到你的班级'}}</text>
+  <text class="page-description">从学校到班级，连接你与校园的日常。</text>
+  <view wx:if="{{previewMode}}" class="notice">当前为页面预览，班级服务暂未启用。学校、年级和班级将在服务开通后显示。</view>
+
   <view class="selection-card card">
-    <view class="selection-field"><view><text class="field-number">01</text><text>选择学校</text></view><t-icon name="chevron-down" size="30rpx" /></view>
-    <view class="selection-field"><view><text class="field-number">02</text><text>选择年级</text></view><t-icon name="chevron-down" size="30rpx" /></view>
-    <view class="selection-field"><view><text class="field-number">03</text><text>选择班级</text></view><t-icon name="chevron-down" size="30rpx" /></view>
+    <button class="selection-heading" data-level="schools" disabled="{{saving}}" bindtap="onExpand">
+      <view class="selection-heading-copy"><text class="field-number">01</text><view class="selection-heading-text"><text class="selection-label">学校</text><text class="selection-value {{selectedSchool ? 'has-value' : ''}}">{{selectedSchool ? selectedSchool.name : '请选择学校'}}</text></view></view>
+      <t-icon name="{{expandedLevel === 'schools' ? 'chevron-up' : 'chevron-down'}}" size="30rpx" />
+    </button>
+    <view wx:if="{{expandedLevel === 'schools'}}" class="selection-body">
+      <text wx:if="{{previewMode}}" class="selection-empty">学校列表将在班级服务启用后显示。</text>
+      <block wx:else>
+        <button wx:for="{{schools.items}}" wx:key="_id" class="choice-row school-option {{selectedSchool._id === item._id ? 'is-selected' : ''}}" data-id="{{item._id}}" disabled="{{saving}}" bindtap="onChooseSchool"><text>{{item.name}}</text><t-icon wx:if="{{selectedSchool._id === item._id}}" name="check" size="30rpx" /></button>
+        <view wx:if="{{schools.loading}}" class="level-loading"><t-loading theme="circular" text="正在读取学校…" /></view>
+        <view wx:if="{{schools.errorMessage}}" class="level-error"><text>{{schools.errorMessage}}</text><t-button theme="default" variant="text" size="small" data-level="schools" disabled="{{schools.loading || saving}}" bind:tap="onRetry">重试</t-button></view>
+        <text wx:if="{{!schools.loading && !schools.errorMessage && !schools.items.length}}" class="selection-empty">暂时没有开放的学校，请稍后再来看看。</text>
+        <view wx:if="{{schools.hasMore && !schools.errorMessage}}" class="load-more"><t-button theme="default" variant="text" size="small" data-level="schools" disabled="{{schools.loading || saving}}" bind:tap="onLoadMore">加载更多学校</t-button></view>
+      </block>
+    </view>
   </view>
-  <view class="notice">班级选择即将开放，暂时无法保存。开通后，你可以在这里依次选择学校、年级和班级。</view>
-  <view wx:if="{{errorMessage}}" class="connection-message">{{errorMessage}}</view>
-  <view class="action-stack"><t-button theme="default" variant="outline" size="large" block loading="{{loading}}" disabled="{{loading}}" bind:tap="onRetry">刷新连接状态</t-button></view>
+
+  <view class="selection-card card {{!selectedSchool ? 'waiting-parent' : ''}}">
+    <button class="selection-heading" data-level="grades" disabled="{{saving || !selectedSchool}}" bindtap="onExpand">
+      <view class="selection-heading-copy"><text class="field-number">02</text><view class="selection-heading-text"><text class="selection-label">年级</text><text class="selection-value {{selectedGrade ? 'has-value' : ''}}">{{selectedGrade ? selectedGrade.name : selectedSchool ? '请选择年级' : '先选择学校'}}</text></view></view>
+      <t-icon name="{{expandedLevel === 'grades' ? 'chevron-up' : 'chevron-down'}}" size="30rpx" />
+    </button>
+    <view wx:if="{{expandedLevel === 'grades' && selectedSchool}}" class="selection-body">
+      <button wx:for="{{grades.items}}" wx:key="_id" class="choice-row grade-option {{selectedGrade._id === item._id ? 'is-selected' : ''}}" data-id="{{item._id}}" disabled="{{saving}}" bindtap="onChooseGrade"><text>{{item.name}}</text><t-icon wx:if="{{selectedGrade._id === item._id}}" name="check" size="30rpx" /></button>
+      <view wx:if="{{grades.loading}}" class="level-loading"><t-loading theme="circular" text="正在读取年级…" /></view>
+      <view wx:if="{{grades.errorMessage}}" class="level-error"><text>{{grades.errorMessage}}</text><t-button theme="default" variant="text" size="small" data-level="grades" disabled="{{grades.loading || saving}}" bind:tap="onRetry">重试</t-button></view>
+      <text wx:if="{{!grades.loading && !grades.errorMessage && !grades.items.length}}" class="selection-empty">这所学校暂时没有开放的年级。</text>
+      <view wx:if="{{grades.hasMore && !grades.errorMessage}}" class="load-more"><t-button theme="default" variant="text" size="small" data-level="grades" disabled="{{grades.loading || saving}}" bind:tap="onLoadMore">加载更多年级</t-button></view>
+    </view>
+  </view>
+
+  <view class="selection-card card {{!selectedGrade ? 'waiting-parent' : ''}}">
+    <button class="selection-heading" data-level="classes" disabled="{{saving || !selectedGrade}}" bindtap="onExpand">
+      <view class="selection-heading-copy"><text class="field-number">03</text><view class="selection-heading-text"><text class="selection-label">班级</text><text class="selection-value {{selectedClass ? 'has-value' : ''}}">{{selectedClass ? selectedClass.name : selectedGrade ? '请选择班级' : '先选择年级'}}</text></view></view>
+      <t-icon name="{{expandedLevel === 'classes' ? 'chevron-up' : 'chevron-down'}}" size="30rpx" />
+    </button>
+    <view wx:if="{{expandedLevel === 'classes' && selectedGrade}}" class="selection-body">
+      <button wx:for="{{classes.items}}" wx:key="_id" class="choice-row class-option {{selectedClass._id === item._id ? 'is-selected' : ''}}" data-id="{{item._id}}" disabled="{{saving}}" bindtap="onChooseClass"><text>{{item.name}}</text><t-icon wx:if="{{selectedClass._id === item._id}}" name="check" size="30rpx" /></button>
+      <view wx:if="{{classes.loading}}" class="level-loading"><t-loading theme="circular" text="正在读取班级…" /></view>
+      <view wx:if="{{classes.errorMessage}}" class="level-error"><text>{{classes.errorMessage}}</text><t-button theme="default" variant="text" size="small" data-level="classes" disabled="{{classes.loading || saving}}" bind:tap="onRetry">重试</t-button></view>
+      <text wx:if="{{!classes.loading && !classes.errorMessage && !classes.items.length}}" class="selection-empty">这个年级暂时没有可自由加入的班级。</text>
+      <view wx:if="{{classes.hasMore && !classes.errorMessage}}" class="load-more"><t-button theme="default" variant="text" size="small" data-level="classes" disabled="{{classes.loading || saving}}" bind:tap="onLoadMore">加载更多班级</t-button></view>
+    </view>
+  </view>
+
+  <view wx:if="{{selectedClass}}" class="selection-summary"><t-icon name="check-circle" size="34rpx" /><view><text class="summary-title">{{selectedSchool.name}}</text><text class="caption">{{selectedGrade.name}} · {{selectedClass.name}}</text></view></view>
+  <view wx:if="{{errorMessage && !previewMode}}" class="selection-error">{{errorMessage}}</view>
+  <view class="action-stack">
+    <t-button custom-style="width:100%;margin-left:0;margin-right:0" id="class-submit" theme="primary" size="large" block loading="{{saving}}" disabled="{{!selectedClass || saving || confirming || previewMode}}" bind:tap="onSubmit">{{switchMode ? '确认切换班级' : '确认加入班级'}}</t-button>
+    <view><t-button custom-style="width:100%;margin-left:0;margin-right:0" id="edit-profile" theme="default" variant="text" size="large" block disabled="{{saving || confirming}}" bind:tap="onEditProfile">返回修改资料</t-button></view>
+  </view>
+  <text class="selection-footnote">{{switchMode ? '切换后，将按新的班级展示校园内容。' : '这里只展示开放的班级，确认后即可加入。'}}</text>
 </view>

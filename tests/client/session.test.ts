@@ -140,3 +140,116 @@ describe('用户会话与页面守卫', () => {
     expect(store.loading).toBe(false);
   });
 });
+
+describe('阶段2会话写入与权限刷新', () => {
+  it('后台旧请求仍在途时的新权限检查必须重新请求且旧结果不放行', async () => {
+    const store = createUserStore();
+    const completions: Array<(result: LoginResult) => void> = [];
+    const login = vi.fn(
+      () =>
+        new Promise<LoginResult>((resolve) => {
+          completions.push(resolve);
+        }),
+    );
+    const navigate = vi.fn().mockResolvedValue(undefined);
+    const controller = new SessionController(store, login, navigate);
+    const beforeHide = controller.requireAdminSession();
+    const afterResume = controller.requireAdminSession();
+    expect(login).toHaveBeenCalledTimes(2);
+    completions[0]?.(session('admin'));
+    expect(await beforeHide).toBe(false);
+    expect(store.user).toBeNull();
+    expect(navigate).not.toHaveBeenCalled();
+    completions[1]?.(session('user'));
+    expect(await afterResume).toBe(false);
+    expect(store.isAdmin).toBe(false);
+  });
+
+  it('资料/班级写入串行，切班只在真实响应后清除上下文', async () => {
+    const store = createUserStore();
+    const controller = new SessionController(
+      store,
+      async () => session('admin'),
+      vi.fn().mockResolvedValue(undefined),
+    );
+    await controller.start();
+    const revision = store.scopeRevision;
+    let finish!: (value: LoginResult) => void;
+    const first = controller.mutate(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const next = {
+      ...session('admin'),
+      user: {
+        ...session('admin').user,
+        currentSchoolId: 'school-b',
+        currentGradeId: 'grade-b',
+        currentClassId: 'class-b',
+      },
+    };
+    const saveNext = vi.fn().mockResolvedValue(next);
+    const second = controller.mutate(saveNext);
+    await Promise.resolve();
+    expect(saveNext).not.toHaveBeenCalled();
+    expect(store.scopeRevision).toBe(revision);
+    finish(session('admin'));
+    await first;
+    await second;
+    expect(store.user?.currentClassId).toBe('class-b');
+    expect(store.user?.adminSchoolId).toBe('school-a');
+    expect(store.currentClass).toBeNull();
+    expect(store.scopeRevision).toBe(revision + 1);
+  });
+
+  it('旧登录响应不能覆盖刚保存的资料，登出后排队写入不执行', async () => {
+    const store = createUserStore();
+    let finishLogin!: (value: LoginResult) => void;
+    const controller = new SessionController(
+      store,
+      async () =>
+        new Promise((resolve) => {
+          finishLogin = resolve;
+        }),
+      vi.fn().mockResolvedValue(undefined),
+    );
+    store.user = session().user;
+    const old = controller.start(true);
+    const changed = session();
+    changed.user.nickname = '刚刚保存';
+    await controller.mutate(async () => changed);
+    finishLogin(session());
+    await old;
+    expect(store.user?.nickname).toBe('刚刚保存');
+    let finishWrite!: (value: LoginResult) => void;
+    const first = controller.mutate(
+      () =>
+        new Promise((resolve) => {
+          finishWrite = resolve;
+        }),
+    );
+    const secondAction = vi.fn().mockResolvedValue(session());
+    const second = controller.mutate(secondAction);
+    const failures = Promise.all([
+      expect(first).rejects.toThrow(),
+      expect(second).rejects.toThrow(),
+    ]);
+    await Promise.resolve();
+    controller.clear();
+    finishWrite(session());
+    await failures;
+    expect(secondAction).not.toHaveBeenCalled();
+    expect(store.user).toBeNull();
+  });
+
+  it('管理操作被拒绝后，即使刷新仍为管理员也会退出管理页', async () => {
+    const store = createUserStore();
+    const navigate = vi.fn().mockResolvedValue(undefined);
+    const controller = new SessionController(store, async () => session('admin'), navigate);
+    await controller.requireAdminSession();
+    await controller.recoverAdminSession();
+    expect(navigate).toHaveBeenLastCalledWith('ready');
+  });
+});

@@ -17,7 +17,7 @@ export function toUserProfile(user: User): UserProfile {
   });
 }
 
-function loginResult(user: User): LoginResult {
+export function loginResult(user: User): LoginResult {
   assertNotDeleted(user);
   const profile = toUserProfile(user);
   return { user: profile, onboardingStep: getOnboardingStep(profile) };

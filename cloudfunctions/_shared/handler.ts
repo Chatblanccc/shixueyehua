@@ -1,6 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import { isRecord } from '../../shared';
 import type { ApiResult } from '../../shared';
+import { updateProfile } from '../authApi/profile';
+import {
+  getCurrentClass,
+  listClasses,
+  listGrades,
+  listSchools,
+  selectClass,
+} from '../classApi/classes';
 import { getProfile, login } from '../authApi/login';
 import {
   requireActiveUser,
@@ -109,6 +117,31 @@ export function createHandler(domain: Domain, dependencies: HandlerDependencies)
           data = await login(dependencies.repository, openid, now);
         } else if (domain === 'authApi' && action === 'getProfile') {
           data = await getProfile(dependencies.repository, openid);
+        } else if (domain === 'authApi' && action === 'updateProfile') {
+          data = await updateProfile(
+            dependencies.repository,
+            openid,
+            parsed.payload,
+            now,
+            requestId,
+          );
+        } else if (domain === 'classApi') {
+          if (action === 'listSchools')
+            data = await listSchools(dependencies.repository, openid, parsed.payload);
+          else if (action === 'listGrades')
+            data = await listGrades(dependencies.repository, openid, parsed.payload);
+          else if (action === 'listClasses')
+            data = await listClasses(dependencies.repository, openid, parsed.payload);
+          else if (action === 'getCurrentClass')
+            data = await getCurrentClass(dependencies.repository, openid, parsed.payload);
+          else
+            data = await selectClass(
+              dependencies.repository,
+              openid,
+              parsed.payload,
+              now,
+              requestId,
+            );
         } else {
           if (domain === 'adminApi' || domain === 'adminAudioApi') {
             // A submitted school is a target to validate, never the source of authority.

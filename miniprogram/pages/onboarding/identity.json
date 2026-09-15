@@ -2,6 +2,7 @@
   "navigationBarTitleText": "认识你",
   "usingComponents": {
     "t-button": "tdesign-miniprogram/button/button",
-    "t-icon": "tdesign-miniprogram/icon/icon"
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "t-loading": "tdesign-miniprogram/loading/loading"
   }
 }

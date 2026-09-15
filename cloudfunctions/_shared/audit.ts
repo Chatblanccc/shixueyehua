@@ -6,6 +6,8 @@ const SNAPSHOT_FIELDS = new Set([
   'role',
   'status',
   'identity',
+  'avatarPreset',
+  'nicknameChanged',
   'adminSchoolId',
   'currentSchoolId',
   'currentGradeId',
@@ -47,7 +49,10 @@ export interface AuditInput {
 }
 
 /** Future privileged writes must persist this log with their state transition atomically. */
-export async function writeAudit(repository: Repository, input: AuditInput): Promise<void> {
+export async function writeAudit(
+  repository: Pick<Repository, 'appendAudit'>,
+  input: AuditInput,
+): Promise<void> {
   const entry: Omit<AdminLog, '_id'> = {
     operatorId: input.actor._id,
     operatorOpenid: input.actor.openid,

@@ -1,5 +1,7 @@
 <view wx:if="{{isOnboarded || previewMode}}" class="page">
   <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
+  <view wx:elif="{{currentClass}}" class="preview-tag">{{currentClass.school.name}} · {{currentClass.class.name}}</view>
+  <view wx:elif="{{classError}}" class="preview-tag">{{classError}}</view>
   <view class="header-row">
     <view>
       <text class="eyebrow">听见校园</text>
