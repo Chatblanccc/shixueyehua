@@ -1,0 +1,18 @@
+# Local credentials and environment overrides
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+project.private.config.json
+
+# Dependencies and generated files
+node_modules/
+coverage/
+*.log
+
+# OS and Office temporary files
+.DS_Store
+Thumbs.db
+~$*
