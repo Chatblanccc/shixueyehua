@@ -22,7 +22,7 @@
 
 ## 当前进度
 
-截至 **2026-09-15**，**阶段 2（TASK-200～202）本地验收通过**，当前位于本地分支 `codex/stage-2-identity-classes`，尚未推送或运行本阶段 CI。阶段 1 已经 [PR #1](https://github.com/Chatblanccc/shixueyehua/pull/1) 合并至 `main`（`20a5681`），GitHub Actions 通过；真实云与手机验收仍待办。
+截至 **2026-09-15**，**阶段 2（TASK-200～202）本地验收通过**，第二阶段开发分支为 `codex/stage-2-identity-classes`，交付见 [PR #2](https://github.com/Chatblanccc/shixueyehua/pull/2)，CI 与合并状态以 PR 记录为准。阶段 1 已经 [PR #1](https://github.com/Chatblanccc/shixueyehua/pull/1) 合并至 `main`（`20a5681`），GitHub Actions 通过；真实云与手机验收仍待办。
 
 - 已实现：14 个页面 / 管理分包、TDesign 与 MobX、共享类型、统一接口和错误、服务端鉴权与登录、数据库初始化与首位超管脚本、质量检查。
 - 本阶段：身份与昵称、内置头像样式、三级选班 / 切换、成员事务和管理员强制守卫已有实现；自定义头像上传、音频播放和家书投稿尚未开发。接口与边界见[第二阶段说明](docs/stage-2.md)。

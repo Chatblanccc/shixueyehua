@@ -1,6 +1,6 @@
 # 文档总览
 
-本目录维护实学夜话 V0.1 的开发基线与实施资料。**阶段 2（TASK-200～202）本地验收通过。** 当前本地分支 `codex/stage-2-identity-classes` 尚未推送或运行本阶段 CI。阶段 1 已通过 [PR #1](https://github.com/Chatblanccc/shixueyehua/pull/1) 合并（`20a5681`），GitHub Actions 通过。用户暂无正式 AppID 和关联云环境，已选择先完成本地开发；云端初始化、可信微信登录联调和手机验收仍待进行。
+本目录维护实学夜话 V0.1 的开发基线与实施资料。**阶段 2（TASK-200～202）本地验收通过。** 第二阶段开发分支为 `codex/stage-2-identity-classes`，交付见 [PR #2](https://github.com/Chatblanccc/shixueyehua/pull/2)，CI 与合并状态以 PR 记录为准。阶段 1 已通过 [PR #1](https://github.com/Chatblanccc/shixueyehua/pull/1) 合并（`20a5681`），GitHub Actions 通过。用户暂无正式 AppID 和关联云环境，已选择先完成本地开发；云端初始化、可信微信登录联调和手机验收仍待进行。
 
 阶段 1 历史记录：在 Node `24.21.0` 下通过完整质量检查、13 文件 / 124 项测试、格式检查与六个实际云函数包的仓库外安装 / 加载 / 审计。模拟器 12 项检查全部通过，异常为 0。根生产、实际部署包及小程序依赖审计均为 0；根全量依赖仍有 17 项 moderate，high / critical 为 0。各层证据见[测试记录](test-cases.md)、[实施计划](implementation-plan.md)及[依赖审计](dependency-audit.md)。
 

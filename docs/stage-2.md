@@ -87,6 +87,6 @@
 
 用例覆盖资料字段拒绝与草稿、三级联动 / 分页 / 无效组织、成员幂等与事务回滚、旧响应与缓存失效、管理员撤权与生命周期。本地集成使用实际云函数 handler 和客户端控制器，持久层及可信上下文仍为本地测试替身，不代表真实云联调。模拟器记录为 `artifacts/devtools-stage2/verification.json`；检查包含启动、四 Tab、七管理页访问拦截，以及身份 / 昵称 / 头像输入、选班空状态、返回与重新打开草稿。初次检查发现自动操作早于原生路由动画完成，脚本现等待导航完成和页面元素可用；截图复核还修正了基础库默认 184px 按钮宽度对身份卡及表单按钮的覆盖。最终截图 `identity.png`、`class-selection.png`、`draft-restored.png` 位于同一目录。
 
-`npm run verify:stage2` 聚合上述检查；本轮各子命令分别实跑通过。当前成果保存在本地分支 `codex/stage-2-identity-classes`，本阶段尚未推送、创建 PR 或执行 GitHub CI。阶段 1 的 PR / CI 通过不能代替本阶段的远程结果。
+`npm run verify:stage2` 聚合上述检查；本轮各子命令分别实跑通过。本阶段开发分支为 `codex/stage-2-identity-classes`，交付见 [PR #2](https://github.com/Chatblanccc/shixueyehua/pull/2)，CI 与合并状态以该 PR 的最终提交记录为准。合并前只读审查未发现有证据的 P1 / P2 阻塞问题；阶段 1 的 CI 结果不代替本阶段验证。
 
 完整需求仍以 [PRD](PRD.md) 和 [TASK-200～202](CODEX_TASKS.md#阶段2身份学校和班级) 为准；环境与运行方式见[开发指引](DEVELOPMENT.md)。

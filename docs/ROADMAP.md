@@ -4,7 +4,7 @@
 
 ## 1. 当前状态与“第一阶段”的含义
 
-仓库克隆和 TASK-000 已完成，**阶段 2 的 TASK-200～202 本地验收通过**，当前本地分支 `codex/stage-2-identity-classes` 尚未推送或运行本阶段 CI。阶段 1 已通过 [PR #1](https://github.com/Chatblanccc/shixueyehua/pull/1) 合并至 `main`（`20a5681`），GitHub Actions 通过。阶段 1 历史记录：Node `24.21.0` 下的完整质量检查、13 文件 / 124 项测试、格式检查、六个实际云包的仓库外安装 / 加载 / 审计均通过；模拟器启动、四 Tab、七管理页共 12 项检查通过，异常为 0。持续状态见[实施计划](implementation-plan.md)、[测试记录](test-cases.md)和[独立验收复核](acceptance-review.md)。
+仓库克隆和 TASK-000 已完成，**阶段 2 的 TASK-200～202 本地验收通过**，第二阶段开发分支为 `codex/stage-2-identity-classes`，交付见 [PR #2](https://github.com/Chatblanccc/shixueyehua/pull/2)，CI 与合并状态以 PR 记录为准。阶段 1 已通过 [PR #1](https://github.com/Chatblanccc/shixueyehua/pull/1) 合并至 `main`（`20a5681`），GitHub Actions 通过。阶段 1 历史记录：Node `24.21.0` 下的完整质量检查、13 文件 / 124 项测试、格式检查、六个实际云包的仓库外安装 / 加载 / 审计均通过；模拟器启动、四 Tab、七管理页共 12 项检查通过，异常为 0。持续状态见[实施计划](implementation-plan.md)、[测试记录](test-cases.md)和[独立验收复核](acceptance-review.md)。
 
 **第一阶段严格指原阶段 1“共享基础、数据与鉴权”，包含 TASK-100、TASK-101、TASK-102、TASK-103。** 阶段 0 的 TASK-001～003 是其工程前置。用户已说明暂无正式 AppID，选择先完成本地开发；当前测试号不能使用云服务，因此本地成果与尚未完成的云端验收分开记录。
 

@@ -9,7 +9,7 @@
 | 本地项目            | `shixueyehua/` 仓库根目录                                                                                                           |
 | 来源                | `https://github.com/Chatblanccc/shixueyehua.git`                                                                                    |
 | 初次导入分支 / 提交 | `main`，`bfc49a87bebd5b974807c17b50031748639d40ee`                                                                                  |
-| 当前本地分支        | `codex/stage-2-identity-classes`；阶段 2 尚未推送，未运行本阶段 CI                                                                  |
+| 第二阶段开发分支    | `codex/stage-2-identity-classes`；交付与 CI / 合并记录见 [PR #2](https://github.com/Chatblanccc/shixueyehua/pull/2)                 |
 | 初次克隆            | 空目录导入文档仓库；原仓库没有页面、云函数、依赖或测试                                                                              |
 | 文档准备            | 规则和 Markdown 基线归位；产品、路线图、技术栈、开发指引和导航补齐；2 份 Word 原件保留                                              |
 | 当前源码            | `miniprogram/`、`shared/`、`cloudfunctions/`、`scripts/`、`tests/`                                                                  |
@@ -93,7 +93,7 @@ npm run verify:stage1
 
 同日 **23:46:14（北京时间）**，阶段 2 模拟器 15 项检查全部通过，异常为 0；报告 `artifacts/devtools-stage2/verification.json` 为 `status=passed`，仍明确 `cloudVerified=false`、`deviceVerified=false`。检查包含原有 12 项启动 / Tab / 管理守卫导航，以及资料表单、无云预览边界、返回并重开后的草稿恢复。上述生成日志与报告均不提交，不覆盖阶段 1 历史证据。
 
-当前本地验收入口为 `npm run verify:stage2`；各子命令已分别实际运行通过，未记录整条串联命令一次退出 0。本阶段位于本地分支 `codex/stage-2-identity-classes`，尚未推送或运行本阶段 CI。
+当前本地验收入口为 `npm run verify:stage2`；各子命令已分别实际运行通过，未记录整条串联命令一次退出 0。本阶段开发分支为 `codex/stage-2-identity-classes`，交付见 [PR #2](https://github.com/Chatblanccc/shixueyehua/pull/2)，CI 与合并状态以 PR 记录为准。
 
 完整 API、成员历史规则、头像范围与验证明细见[第二阶段说明](stage-2.md)。夜话 / 家书页接收范围变化通知，但真实音频和家书列表仍在阶段 3 / 4 开发。当前没有真实云调用或真机结果。
 
