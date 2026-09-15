@@ -1,0 +1,62 @@
+.letter-invitation {
+  position: relative;
+  overflow: hidden;
+  margin-top: 38rpx;
+  padding: 44rpx 36rpx 34rpx;
+  border: 1rpx solid #e5ddcb;
+  border-radius: 8rpx 26rpx 26rpx 26rpx;
+  background: #f1ebdd;
+}
+.letter-corner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14rpx;
+  height: 100%;
+  background: #d8c4a0;
+}
+.letter-stamp {
+  position: absolute;
+  top: 36rpx;
+  right: 32rpx;
+  display: flex;
+  width: 76rpx;
+  height: 90rpx;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx dashed #bfa983;
+  color: #ad8a58;
+  transform: rotate(8deg);
+}
+.letter-salutation {
+  display: block;
+  font-size: 29rpx;
+  font-weight: 500;
+  letter-spacing: 2rpx;
+}
+.letter-thought {
+  display: block;
+  margin-top: 30rpx;
+  font-size: 29rpx;
+  line-height: 1.9;
+  letter-spacing: 2rpx;
+}
+.letter-lines {
+  margin: 14rpx 0 26rpx;
+}
+.letter-lines view {
+  height: 30rpx;
+  border-bottom: 1rpx solid #dcd3c0;
+}
+.letter-lines view:last-child {
+  width: 74%;
+}
+.letter-signature {
+  display: block;
+  color: #a0845f;
+  font-size: 23rpx;
+  text-align: right;
+}
+.compose-button {
+  margin-top: 24rpx;
+}

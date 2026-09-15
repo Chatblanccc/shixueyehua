@@ -1,0 +1,5 @@
+<view class="empty-state">
+  <view class="empty-mark"><t-icon name="{{icon}}" size="56rpx" /></view>
+  <text class="empty-title">{{title}}</text>
+  <text wx:if="{{description}}" class="empty-description">{{description}}</text>
+</view>

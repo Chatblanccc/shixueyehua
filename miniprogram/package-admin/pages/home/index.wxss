@@ -1,0 +1,45 @@
+.admin-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 26rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 8rpx;
+  background: #e9ede8;
+  color: #597465;
+  font-size: 23rpx;
+}
+.admin-list {
+  padding: 0 26rpx;
+}
+.admin-row {
+  display: flex;
+  width: 100%;
+  min-height: 110rpx;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0 4rpx;
+  border-bottom: 1rpx solid #eeede8;
+  border-radius: 0;
+  background: transparent;
+  color: #213c49;
+  font-size: 28rpx;
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: left;
+}
+.admin-row:last-child {
+  border-bottom: 0;
+}
+.admin-row > view {
+  display: flex;
+  align-items: center;
+  gap: 22rpx;
+}
+.admin-row > view t-icon {
+  color: #aa8550;
+}
+.admin-row > t-icon {
+  color: #b4b6ad;
+}

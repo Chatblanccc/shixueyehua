@@ -1,0 +1,79 @@
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 26rpx;
+  padding: 42rpx 0 16rpx;
+}
+.avatar {
+  display: flex;
+  width: 120rpx;
+  height: 120rpx;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 6rpx solid #fff;
+  border-radius: 50%;
+  background: #e9e5d9;
+  color: #8d856f;
+}
+.profile-identity {
+  min-width: 0;
+}
+.nickname {
+  display: block;
+  overflow: hidden;
+  font-size: 36rpx;
+  font-weight: 500;
+  word-break: break-all;
+}
+.identity-label {
+  display: block;
+  margin-top: 8rpx;
+  color: #878a81;
+  font-size: 23rpx;
+}
+.connect-button {
+  margin-top: 22rpx;
+}
+.menu-list {
+  padding: 0 30rpx;
+}
+.menu-row {
+  display: flex;
+  min-height: 112rpx;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+  border-bottom: 1rpx solid #eeede8;
+}
+.menu-row:last-child {
+  border-bottom: 0;
+}
+.menu-label {
+  display: flex;
+  align-items: center;
+  gap: 22rpx;
+  font-size: 28rpx;
+}
+.menu-label t-icon {
+  color: #aa8550;
+}
+.soon-label {
+  flex-shrink: 0;
+  color: #96998f;
+  font-size: 23rpx;
+}
+.admin-entry {
+  margin-top: 30rpx;
+}
+.about-card {
+  margin-top: 58rpx;
+  text-align: center;
+}
+.about-name {
+  display: block;
+  margin-bottom: 14rpx;
+  color: #6d766c;
+  font-size: 27rpx;
+  letter-spacing: 6rpx;
+}

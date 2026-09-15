@@ -1,0 +1,15 @@
+<view class="page onboarding-page">
+  <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
+  <view class="step-track"><text class="current">01 选择身份</text><view class="step-line"></view><text>02 找到班级</text></view>
+  <text class="eyebrow">很高兴，与你相遇</text>
+  <text class="page-title">从认识你开始</text>
+  <text class="page-description">你以怎样的身份，来到这座校园？</text>
+  <view class="identity-options">
+    <view class="identity-option card"><view class="identity-symbol"><t-icon name="user" size="40rpx" /></view><view><text class="identity-title">我是学生</text><text class="caption">在校园里，发现更好的自己</text></view></view>
+    <view class="identity-option card"><view class="identity-symbol"><t-icon name="home" size="40rpx" /></view><view><text class="identity-title">我是家长</text><text class="caption">陪伴孩子，一起慢慢成长</text></view></view>
+    <view class="identity-option card"><view class="identity-symbol"><t-icon name="user-talk" size="40rpx" /></view><view><text class="identity-title">我是教师</text><text class="caption">用心守护，每一段成长</text></view></view>
+  </view>
+  <view class="notice">身份选择即将开放，暂时无法保存。感谢你的耐心，期待在校园里正式相见。</view>
+  <view wx:if="{{errorMessage}}" class="connection-message">{{errorMessage}}</view>
+  <view class="action-stack"><t-button theme="default" variant="outline" size="large" block loading="{{loading}}" disabled="{{loading}}" bind:tap="onRetry">刷新连接状态</t-button></view>
+</view>

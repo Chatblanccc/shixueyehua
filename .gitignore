@@ -6,10 +6,15 @@
 *.pem
 *.key
 project.private.config.json
+config/*.local.json
+miniprogram/generated/
 
 # Dependencies and generated files
 node_modules/
 coverage/
+dist/
+artifacts/
+miniprogram/miniprogram_npm/
 *.log
 
 # OS and Office temporary files

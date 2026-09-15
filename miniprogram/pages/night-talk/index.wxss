@@ -1,0 +1,110 @@
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-seal {
+  padding: 9rpx 12rpx;
+  border: 1rpx solid #b69a70;
+  border-radius: 8rpx;
+  color: #a1855b;
+  font-size: 20rpx;
+  line-height: 1.4;
+  letter-spacing: 4rpx;
+}
+.night-cover {
+  position: relative;
+  overflow: hidden;
+  min-height: 436rpx;
+  margin-top: 36rpx;
+  padding: 42rpx 40rpx 30rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(125deg, #213c49, #2b4a52);
+  color: #fffaf0;
+}
+.cover-label {
+  position: relative;
+  font-size: 22rpx;
+  color: #d7c299;
+  letter-spacing: 4rpx;
+}
+.cover-title {
+  position: relative;
+  display: block;
+  margin-top: 26rpx;
+  font-size: 43rpx;
+  font-weight: 500;
+  line-height: 1.65;
+  letter-spacing: 3rpx;
+}
+.cover-description {
+  position: relative;
+  display: block;
+  margin-top: 16rpx;
+  color: #c1cdd0;
+  font-size: 23rpx;
+  letter-spacing: 1rpx;
+}
+.cover-moon {
+  position: absolute;
+  top: 58rpx;
+  right: -20rpx;
+  width: 250rpx;
+  height: 250rpx;
+  border: 1rpx solid rgba(236, 221, 183, 0.16);
+  border-radius: 50%;
+}
+.cover-moon::before {
+  position: absolute;
+  top: 37rpx;
+  left: 37rpx;
+  width: 174rpx;
+  height: 174rpx;
+  border: 1rpx solid rgba(236, 221, 183, 0.11);
+  border-radius: 50%;
+  content: '';
+}
+.cover-moon::after {
+  position: absolute;
+  top: 73rpx;
+  left: 73rpx;
+  width: 102rpx;
+  height: 102rpx;
+  border-radius: 50%;
+  background: rgba(236, 221, 183, 0.12);
+  content: '';
+}
+.cover-footer {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  margin-top: 36rpx;
+  padding-top: 26rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.12);
+  color: #c8d2d0;
+  font-size: 21rpx;
+  letter-spacing: 1rpx;
+}
+.sound-bars {
+  display: flex;
+  height: 34rpx;
+  align-items: center;
+  gap: 6rpx;
+}
+.sound-bars view {
+  width: 4rpx;
+  height: 10rpx;
+  border-radius: 3rpx;
+  background: #d1b77e;
+}
+.sound-bars view:nth-child(2),
+.sound-bars view:nth-child(6) {
+  height: 20rpx;
+}
+.sound-bars view:nth-child(3),
+.sound-bars view:nth-child(5) {
+  height: 28rpx;
+}
+.sound-bars view:nth-child(4) {
+  height: 34rpx;
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2020"],
+    "types": ["miniprogram-api-typings"],
+    "experimentalDecorators": true
+  },
+  "include": ["miniprogram/**/*.ts", "shared/**/*.ts"],
+  "exclude": ["miniprogram/node_modules", "miniprogram/miniprogram_npm"]
+}

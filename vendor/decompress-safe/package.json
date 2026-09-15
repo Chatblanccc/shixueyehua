@@ -1,0 +1,15 @@
+{
+  "name": "@shixue/decompress-safe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CommonJS promise adapter for the maintained decompress fork",
+  "main": "index.cjs",
+  "license": "MIT",
+  "files": [
+    "index.cjs",
+    "README.md"
+  ],
+  "dependencies": {
+    "@xhmikosr/decompress": "11.1.4"
+  }
+}

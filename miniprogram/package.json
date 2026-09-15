@@ -1,0 +1,10 @@
+{
+  "name": "shixueyehua-miniprogram",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "mobx-miniprogram": "6.12.3",
+    "mobx-miniprogram-bindings": "7.0.0",
+    "tdesign-miniprogram": "1.16.1"
+  }
+}

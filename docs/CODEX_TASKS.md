@@ -14,9 +14,7 @@
 
 > Codex必须把本任务书视为实现约束，而不是灵感参考。遇到未定义细节时，优先选择简单、可测试、安全、符合微信原生能力的方案，不得自行扩大产品范围。
 
-```{=openxml}
-<w:p><w:r><w:br w:type="page"/></w:r></w:p>
-```
+> 2026-09-15 开发准备补充：统一文档路径、管理员授权学校、配置存储、初始安全规则及 Node 基线；保留原 TASK 编号和产品范围。参见[实施计划](implementation-plan.md)、[开发决策](decisions.md)和[开发指引](DEVELOPMENT.md)。
 
 # 1. Codex执行总则
 
@@ -72,7 +70,7 @@ MobX Miniprogram（只用于用户和播放器全局状态）
 ## 2.2 后端
 
 ```text
-CloudBase云函数：Node.js 20 LTS基线
+CloudBase云函数：Node.js 24 LTS基线（具体runtime标识在TASK-003核验并锁定）
 CloudBase文档型数据库
 CloudBase云存储
 CloudBase安全规则
@@ -80,7 +78,7 @@ CloudBase定时触发器或清理函数
 微信当前官方内容安全能力
 ```
 
-若CloudBase控制台不支持指定的Node版本，使用控制台当前最高稳定LTS，并保持全部云函数一致。
+若目标CloudBase环境不支持Node.js 24，核验仍受支持的Node.js 22 LTS作为回退，全部云函数保持一致。不新部署已EOL的Node.js 20。本地Node版本与云端部署结果分别验证；官方依据及核验日期见[开发决策 DEC-007](decisions.md#dec-007-node-基线更新)。
 
 ## 2.3 质量工具
 
@@ -94,7 +92,7 @@ CloudBase定时触发器或清理函数
 # 3. 推荐仓库结构
 
 ```text
-shixue-night-talk/
+shixueyehua/
 ├─ miniprogram/
 │  ├─ app.ts
 │  ├─ app.json
@@ -251,6 +249,8 @@ assertSameSchool(actor, resourceSchoolId): void
 
 任何管理action不得直接读取`payload.role`决定权限。
 
+管理员的授权学校取自服务端用户记录的`adminSchoolId`，不得取用户可自行切换的`currentSchoolId`。`admin`缺少授权字段或目标资源学校不匹配时拒绝；`super_admin`仍须校验目标学校与资源有效。客户端提交的schoolId仅可作为待校验的选择或目标，不能成为授权依据。
+
 ## 4.3 客户端服务层
 
 所有页面通过`services/*.service.ts`调用云函数。页面不得直接散落：
@@ -312,6 +312,7 @@ interface User {
   avatarFileId?: string;
   identity?: UserIdentity;
   role: UserRole;
+  adminSchoolId?: string; // 仅服务端授权写入，与用户自选学校分离
   currentSchoolId?: string;
   currentGradeId?: string;
   currentClassId?: string;
@@ -325,7 +326,7 @@ interface User {
 
 ```typescript
 type AudioStatus = 'draft' | 'published' | 'offline' | 'deleted';
-type Visibility = 'school' | 'classes' | 'public';
+type Visibility = 'school' | 'classes'; // V0.1不开放跨校公开音频
 
 interface AudioProgram {
   _id: string;
@@ -401,6 +402,7 @@ interface Letter {
 interface SystemConfig {
   schoolId?: string;
   letterPublishMode: 'private' | 'reviewed_showcase' | 'community';
+  enableLetterImages: boolean;
   maxLetterImages: number;
   reportAutoHideThreshold: number;
   enableClassApproval: boolean;
@@ -411,16 +413,20 @@ interface SystemConfig {
 }
 ```
 
+`SystemConfig` 是读取结果，数据库保存为 `system_configs` 的 `key/value/schoolId` 记录；每个作用域使用确定性 `_id`，初始化及配置覆盖约定见[开发决策 DEC-004](decisions.md#dec-004-配置存储与读取约定)。`enableLetterImages=false` 时禁止图片；启用时按 `maxLetterImages` 校验，V0.1 最大为3。
+
 # 6. 云函数接口清单
 
 ## 6.1 authApi
 
 | action | 权限 | 输入 | 输出 |
 |---|---|---|---|
-| login | 登录上下文 | 无 | User |
-| getProfile | 登录用户 | 无 | User |
+| login | 登录上下文 | 无 | LoginResult（UserProfile + onboardingStep） |
+| getProfile | 登录用户 | 无 | LoginResult（UserProfile + onboardingStep） |
 | updateProfile | 登录用户 | nickname、avatarFileId、identity | User |
 | requestDelete | 登录用户 | reason可选 | requestId |
+
+TASK-103实现时将`login/getProfile`统一为`LoginResult`，客户端用户为白名单`UserProfile`，不含OpenID，时间使用ISO字符串。`User`仍为服务端数据库模型（含OpenID和Date）。`authApi.health`仅供dev/test连通诊断，详见[实际接口文档](cloud-functions.md)。
 
 ## 6.2 classApi
 
@@ -519,6 +525,7 @@ interface SystemConfig {
 3. 配置四个tabBar页面和管理员分包。
 4. 创建统一主题变量、全局字体、页面背景和安全区处理。
 5. 创建launch、night-talk、letters、class、profile空壳页面。
+   同时注册身份与选班占位路由，使TASK-103能稳定展示待完善步骤；完整身份/选班交互仍由TASK-200/201实现。
 6. 确保微信开发者工具可构建，不出现npm组件缺失。
 
 验收：
@@ -616,12 +623,17 @@ interface SystemConfig {
 3. 编写`seed-dev-data.ts`，生成一所测试学校、两个年级、四个班级、默认配置。
 4. 编写`bootstrap-super-admin.ts`，通过OpenID设置首个超级管理员。
 5. 脚本必须可重复执行且不重复插入。
+6. 创建集合时一并部署数据库和存储初始默认拒绝客户端访问的规则；通过云函数访问数据，上传规则在TASK-601随业务按需开放。
+7. `system_configs`按作用域确定性ID写入，补齐`enableLetterImages=true`，区分存储记录与业务读取类型。
+8. 超管脚本只处理已存在的可信用户，默认拒绝非开发环境；目标账号先经TASK-103真实登录，再从服务端记录取得OpenID执行授权。不得开放客户端bootstrap action，不用虚构OpenID创建真实管理员。
 
 验收：
 
 - 开发环境一条命令可初始化。
 - 唯一索引阻止重复用户、收藏和播放进度。
 - 种子数据可安全重复运行。
+- 客户端直接读写受保护集合、提权或未经授权访问存储均被拒绝。
+- 超管脚本对不存在用户拒绝，对已授权用户重复执行不重复授权；真实授权在TASK-103首次登录后验证。
 
 ## TASK-103 登录云函数与用户会话
 
@@ -635,12 +647,14 @@ interface SystemConfig {
 3. 返回需要补全的onboarding步骤。
 4. 实现UserStore：loading、user、isOnboarded、isAdmin。
 5. 启动页根据用户状态跳转，不出现循环跳转。
+6. 身份与选班页面尚未完成时，以有效占位路由显示待完善步骤；不宣称完成选班流程。
 
 验收：
 
 - 同一OpenID只创建一条用户记录。
 - 客户端传入伪造OpenID不起作用。
 - 被disabled用户按规则受限。
+- 以真实开发环境的可信用户验证首位超管脚本，确认授权与日志；不能以测试上下文替代真实登录证据。
 
 # 阶段2：身份、学校和班级
 
@@ -654,6 +668,7 @@ interface SystemConfig {
 1. 创建学生、家长、教师三种身份卡片。
 2. 允许用户填写昵称和可选头像。
 3. updateProfile只接受允许字段，不能修改role、status和schoolId。
+   同样禁止修改adminSchoolId及currentSchoolId；当前学校只能由selectClass校验层级后设置。
 4. 完成后进入班级选择。
 
 验收：
@@ -673,6 +688,7 @@ interface SystemConfig {
 2. V0.1只展示active学校、年级和班级。
 3. `selectClass`服务端校验层级关系。
 4. 更新users当前班级并upsert class_memberships。
+   不修改adminSchoolId；切换学校不会扩大管理员授权范围。
 5. 班级切换后清理列表缓存并刷新音频、家书。
 6. 写入class_switch日志。
 
@@ -827,7 +843,7 @@ interface SystemConfig {
 ## TASK-400 家书草稿、更新与提交接口
 
 **优先级：P0**  
-**依赖：TASK-201、TASK-101**
+**依赖：TASK-201、TASK-101、TASK-600**
 
 实施：
 
@@ -992,7 +1008,9 @@ interface SystemConfig {
 
 1. 仅super_admin可搜索已登录用户并授权admin。
 2. 授权时绑定schoolId。
+   服务端将目标学校写入users.adminSchoolId，不修改用户当前所选学校。
 3. 撤销后用户立即失去管理能力。
+   撤销时清除adminSchoolId，下一次请求重新从服务端核验角色和授权。
 4. 不允许撤销最后一个super_admin。
 5. 所有变更写日志。
 
@@ -1009,6 +1027,7 @@ interface SystemConfig {
 实施：
 
 1. 实现letterPublishMode、maxLetterImages、reportAutoHideThreshold、maintenanceMode等配置。
+   同时实现enableLetterImages；存储与覆盖按DEC-004，学校管理员只可写明确白名单字段，所有全局配置仅超级管理员可写。
 2. 前端读取配置但不以客户端配置代替服务端校验。
 3. 关闭模块时展示维护状态。
 4. 修改配置记录before和after。
@@ -1059,6 +1078,8 @@ interface SystemConfig {
 - 单元测试覆盖通过、复核、拒绝、超时四类结果。
 
 ## TASK-601 数据库与存储安全规则
+
+初始默认拒绝规则已要求在TASK-102落实；本任务负责随上传业务细化并完成完整规则验收。TASK-304和TASK-401的真实上传流程须同步完成对应规则后才能验收，不等待全部业务结束。
 
 **优先级：P0**  
 **依赖：TASK-102、TASK-304、TASK-401**
@@ -1146,6 +1167,7 @@ interface SystemConfig {
 ```json
 {
   "letterPublishMode": "reviewed_showcase",
+  "enableLetterImages": true,
   "maxLetterImages": 3,
   "reportAutoHideThreshold": 3,
   "enableClassApproval": false,
@@ -1163,7 +1185,7 @@ interface SystemConfig {
 - 班级：每个年级一班、二班。
 - 音频：一条已发布、一条草稿、一条下架。
 - 家书：draft、pending、approved、rejected各一条。
-- 用户：普通用户、管理员、超级管理员各一条，但OpenID必须通过本地配置注入，不写死真实值。
+- 真实开发环境测试用户由TASK-103首次登录创建；种子只引用已存在的可信用户，OpenID通过本地配置注入。管理员与超级管理员由受控授权步骤赋予，seed不创建真实账号或管理员。虚构用户仅用于隔离自动化测试，不写入真实云环境。
 
 # 9. 错误码实现要求
 

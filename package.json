@@ -1,0 +1,76 @@
+{
+  "name": "shixueyehua",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "实学夜话 · 校园音频与一封家书微信小程序",
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0"
+  },
+  "scripts": {
+    "postinstall": "npm run prepare:local",
+    "pretest": "npm run prepare:local",
+    "prepare:local": "tsx scripts/prepare-local.ts",
+    "build:shared": "tsx scripts/build-shared.ts",
+    "build:cloud": "tsx scripts/build-cloud.ts",
+    "build": "npm run prepare:local && npm run build:cloud && npm run check:project",
+    "lint": "eslint .",
+    "typecheck": "npm run prepare:local && tsc -p tsconfig.server.json && tsc -p tsconfig.miniprogram.json && tsc -p tsconfig.tests.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format:check": "prettier --check shared cloudfunctions miniprogram scripts tests '*.json' '*.mjs'",
+    "check:project": "tsx scripts/check-project.ts",
+    "check:cloud": "tsx scripts/check-cloud-packages.ts",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run build",
+    "db:init": "tsx scripts/init-database.ts",
+    "db:bootstrap-admin": "tsx scripts/bootstrap-super-admin.ts",
+    "devtools:build-npm": "tsx scripts/devtools.ts build-npm",
+    "devtools:open": "tsx scripts/devtools.ts open",
+    "devtools:verify": "tsx scripts/verify-devtools.ts",
+    "verify:stage1": "npm run verify && npm run format:check && npm run check:cloud && npm run db:init -- --dry-run && npm run db:bootstrap-admin -- --dry-run && npm audit --omit=dev && npm --prefix miniprogram audit --omit=dev && npm run devtools:verify"
+  },
+  "dependencies": {
+    "wx-server-sdk": "4.0.2",
+    "lodash.set": "file:config/cloud-runtime/vendor/shixue-lodash-set-safe-1.0.1.tgz"
+  },
+  "devDependencies": {
+    "@cloudbase/manager-node": "5.8.7",
+    "@cloudbase/node-sdk": "3.18.3",
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.13.4",
+    "esbuild": "0.28.2",
+    "eslint": "10.10.0",
+    "globals": "17.12.0",
+    "miniprogram-api-typings": "5.2.3",
+    "miniprogram-automator": "0.12.1",
+    "prettier": "3.9.6",
+    "tsx": "4.23.13",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.0",
+    "vitest": "5.0.1",
+    "decompress": "file:vendor/tarballs/shixue-decompress-safe-1.0.0.tgz"
+  },
+  "overrides": {
+    "@cloudbase/node-sdk": {
+      "axios": "0.33.0"
+    },
+    "@cloudbase/database@1.4.3": {
+      "lodash.set": "$lodash.set",
+      "lodash.unset": "4.18.0"
+    },
+    "@cloudbase/toolbox": {
+      "decompress": "$decompress"
+    },
+    "mkdirp@0.5.1": "0.5.6",
+    "request": {
+      "form-data": "2.5.6",
+      "qs": "6.16.0"
+    },
+    "cos-nodejs-sdk-v5": {
+      "fast-xml-parser": "5.11.1"
+    },
+    "@jimp/jpeg": {
+      "jpeg-js": "0.4.4"
+    }
+  }
+}

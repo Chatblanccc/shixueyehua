@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "班级",
+  "usingComponents": {
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-loading": "tdesign-miniprogram/loading/loading",
+    "empty-state": "/components/empty-state/index"
+  }
+}

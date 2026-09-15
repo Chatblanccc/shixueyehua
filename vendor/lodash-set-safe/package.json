@@ -1,0 +1,15 @@
+{
+  "name": "@shixue/lodash-set-safe",
+  "version": "1.0.1",
+  "private": true,
+  "description": "CommonJS lodash.set compatibility adapter using the maintained lodash/set implementation",
+  "main": "index.cjs",
+  "license": "MIT",
+  "files": [
+    "index.cjs",
+    "README.md"
+  ],
+  "dependencies": {
+    "lodash": "4.18.1"
+  }
+}

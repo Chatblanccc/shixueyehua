@@ -1,0 +1,68 @@
+{
+  "pages": [
+    "pages/launch/index",
+    "pages/onboarding/identity",
+    "pages/class-select/index",
+    "pages/night-talk/index",
+    "pages/letters/index",
+    "pages/class/index",
+    "pages/profile/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "实学夜话",
+    "navigationBarBackgroundColor": "#f7f5f0",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f7f5f0",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#85867f",
+    "selectedColor": "#213c49",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/night-talk/index",
+        "text": "夜话",
+        "iconPath": "assets/tabbar/night.png",
+        "selectedIconPath": "assets/tabbar/night-active.png"
+      },
+      {
+        "pagePath": "pages/letters/index",
+        "text": "一封家书",
+        "iconPath": "assets/tabbar/letter.png",
+        "selectedIconPath": "assets/tabbar/letter-active.png"
+      },
+      {
+        "pagePath": "pages/class/index",
+        "text": "班级",
+        "iconPath": "assets/tabbar/class.png",
+        "selectedIconPath": "assets/tabbar/class-active.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "assets/tabbar/profile.png",
+        "selectedIconPath": "assets/tabbar/profile-active.png"
+      }
+    ]
+  },
+  "subpackages": [
+    {
+      "root": "package-admin",
+      "name": "admin",
+      "pages": [
+        "pages/home/index",
+        "pages/audio-create/index",
+        "pages/audio-manage/index",
+        "pages/letter-review/index",
+        "pages/class-manage/index",
+        "pages/admin-manage/index",
+        "pages/settings/index"
+      ]
+    }
+  ],
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
