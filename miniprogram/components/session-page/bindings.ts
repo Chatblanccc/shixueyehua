@@ -19,6 +19,10 @@ export function bindUserStore(target: BindingTarget): void {
       'onboardingStep',
       'errorMessage',
       'previewMode',
+      'currentClass',
+      'classLoading',
+      'classError',
+      'scopeRevision',
     ],
     actions: [],
   });

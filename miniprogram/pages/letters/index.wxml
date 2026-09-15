@@ -1,5 +1,7 @@
 <view wx:if="{{isOnboarded || previewMode}}" class="page">
   <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
+  <view wx:elif="{{currentClass}}" class="preview-tag">{{currentClass.school.name}} · {{currentClass.class.name}}</view>
+  <view wx:elif="{{classError}}" class="preview-tag">{{classError}}</view>
   <text class="eyebrow">落笔，是另一种拥抱</text>
   <text class="page-title">一封家书</text>
   <text class="page-description">写下平日没说出口的话，寄给重要的人。</text>

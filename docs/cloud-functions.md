@@ -1,6 +1,6 @@
 # 云函数接口与部署包
 
-更新：2026-09-15。对应 TASK-100、TASK-101、TASK-103。当前阶段 1 本地验收全部通过，包括严格类型检查、自动化测试、实际云函数包的独立安装 / 加载 / 审计；用户确认暂未具备可用的正式小程序 AppID 和关联云环境。**本文描述已实现代码，不表示已经部署或通过真实微信登录验收；尚未进入阶段 2。**
+更新：2026-09-15。对应阶段 1 与 TASK-200～202。资料更新、三级目录、事务选班和页面守卫已实现；本文描述本地代码与验证结果，尚未部署云函数或使用真实微信身份联调。用户已明确正式 AppID 与关联云环境后补。
 
 相关入口：[开发指引](DEVELOPMENT.md) · [数据库初始化](database.md) · [安全规则](security-rules.md) · [依赖审计](dependency-audit.md) · [实施计划](implementation-plan.md)。
 
@@ -10,8 +10,8 @@
 
 | 函数            | 已注册 action                                                                                                                                                                       | 当前行为                                                                                    |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `authApi`       | `login`、`getProfile`、`health`、`updateProfile`、`requestDelete`                                                                                                                   | 前三个已实现；后两个完成基础登录 / 状态守卫后返回 `NOT_IMPLEMENTED`                         |
-| `classApi`      | `listSchools`、`listGrades`、`listClasses`、`selectClass`、`getCurrentClass`                                                                                                        | 完成基础登录 / 状态守卫后返回 `NOT_IMPLEMENTED`                                             |
+| `authApi`       | `login`、`getProfile`、`health`、`updateProfile`、`requestDelete`                                                                                                                   | `login/getProfile/health/updateProfile` 已实现；`requestDelete` 仍返回 `NOT_IMPLEMENTED`    |
+| `classApi`      | `listSchools`、`listGrades`、`listClasses`、`selectClass`、`getCurrentClass`                                                                                                        | 五个 action 已实现，目录按活跃状态和父级过滤，选班为事务写入                                |
 | `audioApi`      | `list`、`detail`、`saveProgress`、`history`、`toggleFavorite`、`listFavorites`                                                                                                      | 完成基础登录 / 状态守卫后返回 `NOT_IMPLEMENTED`                                             |
 | `letterApi`     | `createDraft`、`updateDraft`、`submit`、`listPublic`、`detail`、`listMine`、`withdraw`、`delete`、`report`                                                                          | 完成基础登录 / 状态守卫后返回 `NOT_IMPLEMENTED`                                             |
 | `adminAudioApi` | `createDraft`、`updateDraft`、`publish`、`offline`、`delete`、`listManage`                                                                                                          | 先验证服务端管理员、账号状态和授权学校；通过后返回 `NOT_IMPLEMENTED`                        |
@@ -69,6 +69,7 @@ interface UserProfile {
   _id: string;
   nickname: string;
   avatarFileId?: string;
+  avatarPreset?: 'moon' | 'book' | 'bamboo';
   identity?: 'student' | 'parent' | 'teacher';
   role: 'user' | 'admin' | 'super_admin';
   adminSchoolId?: string;
@@ -94,13 +95,34 @@ DTO 不含 OpenID、删除操作者或其他数据库内部字段；通过白名
 | 已有 identity，但 school / grade / class 任一缺失 | `class`          |
 | identity 和三个当前组织字段完整                   | `ready`          |
 
-上述步骤只用于导航，不授予权限。阶段 1 用有效占位路由承接身份与选班，完整业务仍属于 TASK-200 / TASK-201。
+上述步骤只用于导航，不授予权限。阶段 2 已实现身份表单与三级选班；`getCurrentClass` 另检查当前组织是否仍然有效，不把三个 ID 齐全当作组织永久有效的证明。
 
 ### 账号状态
 
 - `active`：正常登录。
 - `disabled`：允许登录和读取本人档案，以展示受限状态；投稿及管理写守卫返回 `USER_DISABLED`。
 - `status=deleted` 或 `deletedAt` 非空：返回 `USER_DELETED`，不重新创建替代账号。
+
+## 3.1 阶段 2 资料与班级接口
+
+| action                     | 输入 payload                                     | 输出 data                          |
+| -------------------------- | ------------------------------------------------ | ---------------------------------- |
+| `authApi.updateProfile`    | 必填 `identity`；可选 `nickname`、`avatarPreset` | `LoginResult`                      |
+| `classApi.listSchools`     | 可选 `cursor`、`pageSize`                        | `CursorPage<SchoolOption>`         |
+| `classApi.listGrades`      | `schoolId`；可选 `cursor`、`pageSize`            | `CursorPage<GradeOption>`          |
+| `classApi.listClasses`     | `schoolId`、`gradeId`；可选 `cursor`、`pageSize` | `CursorPage<ClassOption>`          |
+| `classApi.selectClass`     | `schoolId`、`gradeId`、`classId`                 | `LoginResult`                      |
+| `classApi.getCurrentClass` | 无业务字段                                       | `{school, grade, class}` 或 `null` |
+
+资料更新严格拒绝白名单外字段，包括 `role`、`status`、各学校授权 / 当前组织字段及任意 `avatarFileId`。昵称最多 80 个 UTF-16 字符，拒绝控制字符，空白昵称回落“夜话听友”。头像采用可选的内置 `moon/book/bamboo` 样式；自定义图片上传尚未实现。旧档案的 avatarFileId 读取兼容仍保留，但不能通过资料接口伪造其他用户的文件。
+
+目录只返回活跃、未删除的组织；班级额外限制 `joinMode=free`。默认每页 20 项，最多 100 项，以 `_id` 升序翻页，返回 `{items, nextCursor?}`；前端提供逐级“加载更多”。游标包含版本、父级范围和最后 ID，格式及范围需匹配；它不是权限凭据，不能改变服务端按当前请求重新验证的父级过滤。DTO 字段见 [shared/domain.ts](../shared/domain.ts)，不返回数据库内部字段。
+
+选择班级时在同一事务内重新检查真实用户的活跃状态和身份、三级组织的状态与归属，再更新用户 current*、以确定性 user/class ID upsert 成员关系，并写 `class_switch` 审计。保留 `adminSchoolId` 和历史其他班级关系；已是当前班且成员状态一致时不重复写日志。修改身份会在同事务同步当前有效成员的身份，其他历史成员保留加入时身份，不盲造缺失成员。
+
+`getCurrentClass` 从真实用户的 current* 读取，当前组织缺失、停用、毕业、非自由加入或父子不匹配均返回 `null`，客户端提示重新选择。它不接受客户端传入任意用户或班级作为查询目标。`profile_update` 与 `class_switch` 的审计失败会让本次业务事务回滚。
+
+生产数据库显式使用 `throwOnNotFound:false`，让首次选班缺失成员文档能进入创建分支；事务仍验证用户 / 成员更新回执、成员 / 审计新增 ID，以及事务提交回执。实际 wx SDK 的离线传输边界已测试；真实云事务冲突、索引与查询语义仍需开发环境验证。详情见[第二阶段实现与验收](stage-2.md)。
 
 ## 4. 开发健康检查
 

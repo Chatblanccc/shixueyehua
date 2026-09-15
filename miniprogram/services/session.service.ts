@@ -29,3 +29,8 @@ const controller = new SessionController(userStore, authService.login, (destinat
 export const startSession = (force = false): Promise<void> => controller.start(force);
 export const requireSession = (): Promise<boolean> => controller.requireSession();
 export const requireAdminSession = (): Promise<boolean> => controller.requireAdminSession();
+
+export const ensureUserSession = (): Promise<boolean> => controller.ensureUser();
+export const mutateSession = (action: () => Promise<import('../generated/shared').LoginResult>) =>
+  controller.mutate(action);
+export const recoverAdminSession = (): Promise<void> => controller.recoverAdminSession();

@@ -1,15 +1,48 @@
 <view class="page onboarding-page">
   <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
-  <view class="step-track"><text class="current">01 选择身份</text><view class="step-line"></view><text>02 找到班级</text></view>
+  <view wx:if="{{!editMode}}" class="step-track"><text class="current">01 选择身份</text><view class="step-line"></view><text>02 找到班级</text></view>
   <text class="eyebrow">很高兴，与你相遇</text>
-  <text class="page-title">从认识你开始</text>
-  <text class="page-description">你以怎样的身份，来到这座校园？</text>
-  <view class="identity-options">
-    <view class="identity-option card"><view class="identity-symbol"><t-icon name="user" size="40rpx" /></view><view><text class="identity-title">我是学生</text><text class="caption">在校园里，发现更好的自己</text></view></view>
-    <view class="identity-option card"><view class="identity-symbol"><t-icon name="home" size="40rpx" /></view><view><text class="identity-title">我是家长</text><text class="caption">陪伴孩子，一起慢慢成长</text></view></view>
-    <view class="identity-option card"><view class="identity-symbol"><t-icon name="user-talk" size="40rpx" /></view><view><text class="identity-title">我是教师</text><text class="caption">用心守护，每一段成长</text></view></view>
+  <text class="page-title">{{editMode ? '让我们再认识你' : '从认识你开始'}}</text>
+  <text class="page-description">选一个适合你的身份，留下你喜欢的称呼。</text>
+  <view wx:if="{{loading}}" class="form-loading"><t-loading theme="circular" text="正在读取资料…" /></view>
+  <block wx:else>
+    <view class="form-section-title"><text>我来到校园的身份</text><text class="field-required">必选</text></view>
+    <view class="identity-options">
+      <button id="identity-student" class="identity-option card {{identity === 'student' ? 'is-selected' : ''}}" data-identity="student" disabled="{{saving}}" bindtap="onChooseIdentity" aria-label="我是学生">
+        <view class="identity-symbol"><t-icon name="user" size="38rpx" /></view>
+        <view class="identity-copy"><text class="identity-title">我是学生</text><text class="caption">在校园里，发现更好的自己</text></view>
+        <view class="choice-mark"><t-icon wx:if="{{identity === 'student'}}" name="check" size="24rpx" /></view>
+      </button>
+      <button id="identity-parent" class="identity-option card {{identity === 'parent' ? 'is-selected' : ''}}" data-identity="parent" disabled="{{saving}}" bindtap="onChooseIdentity" aria-label="我是家长">
+        <view class="identity-symbol"><t-icon name="home" size="38rpx" /></view>
+        <view class="identity-copy"><text class="identity-title">我是家长</text><text class="caption">陪伴孩子，一起慢慢成长</text></view>
+        <view class="choice-mark"><t-icon wx:if="{{identity === 'parent'}}" name="check" size="24rpx" /></view>
+      </button>
+      <button id="identity-teacher" class="identity-option card {{identity === 'teacher' ? 'is-selected' : ''}}" data-identity="teacher" disabled="{{saving}}" bindtap="onChooseIdentity" aria-label="我是教师">
+        <view class="identity-symbol"><t-icon name="user-talk" size="38rpx" /></view>
+        <view class="identity-copy"><text class="identity-title">我是教师</text><text class="caption">用心守护，每一段成长</text></view>
+        <view class="choice-mark"><t-icon wx:if="{{identity === 'teacher'}}" name="check" size="24rpx" /></view>
+      </button>
+    </view>
+    <view class="form-section-title"><text>喜欢的称呼</text><text class="section-note">选填</text></view>
+    <view class="nickname-field card">
+      <input id="nickname-input" class="nickname-input" value="{{nickname}}" maxlength="80" placeholder="给自己起一个昵称" placeholder-class="input-placeholder" disabled="{{saving}}" bindinput="onNicknameInput" adjust-position="{{true}}" cursor-spacing="28" aria-label="昵称，选填" />
+      <text class="input-count">{{nickname.length}}/80</text>
+    </view>
+    <text class="field-hint">留空会使用默认称呼，随时可以回来修改。</text>
+    <view class="form-section-title"><text>一枚小小的头像</text><text class="section-note">选填</text></view>
+    <view class="avatar-options">
+      <button id="avatar-moon" class="avatar-option {{avatarPreset === 'moon' ? 'is-selected' : ''}}" data-preset="moon" disabled="{{saving}}" bindtap="onChooseAvatar" aria-label="月光头像"><view class="preset-avatar preset-moon"><text>月</text></view><text class="avatar-label">月光</text></button>
+      <button id="avatar-book" class="avatar-option {{avatarPreset === 'book' ? 'is-selected' : ''}}" data-preset="book" disabled="{{saving}}" bindtap="onChooseAvatar" aria-label="书页头像"><view class="preset-avatar preset-book"><text>书</text></view><text class="avatar-label">书页</text></button>
+      <button id="avatar-bamboo" class="avatar-option {{avatarPreset === 'bamboo' ? 'is-selected' : ''}}" data-preset="bamboo" disabled="{{saving}}" bindtap="onChooseAvatar" aria-label="青竹头像"><view class="preset-avatar preset-bamboo"><text>竹</text></view><text class="avatar-label">青竹</text></button>
+    </view>
+    <view wx:if="{{previewMode}}" class="notice">当前为页面预览。填写内容仅作为本次预览的草稿保留，云服务启用后才能保存资料。</view>
+  </block>
+  <view wx:if="{{errorMessage}}" class="form-error"><t-icon name="info-circle" size="28rpx" /><text>{{errorMessage}}</text></view>
+  <view class="action-stack">
+    <t-button custom-style="width:100%;margin-left:0;margin-right:0" id="identity-submit" theme="primary" size="large" block loading="{{saving}}" disabled="{{loading || saving || !identity}}" bind:tap="onSubmit">{{previewMode ? '查看保存说明' : editMode ? '保存资料' : '下一步，找到班级'}}</t-button>
+    <view wx:if="{{errorMessage && !previewMode}}"><t-button custom-style="width:100%;margin-left:0;margin-right:0" theme="default" variant="outline" size="large" block disabled="{{loading || saving}}" bind:tap="onRetry">重新读取资料</t-button></view>
+    <view wx:if="{{previewMode}}"><t-button custom-style="width:100%;margin-left:0;margin-right:0" id="preview-class-select" theme="default" variant="text" size="large" block bind:tap="onPreviewClasses">预览班级选择<t-icon name="chevron-right" size="28rpx" /></t-button></view>
   </view>
-  <view class="notice">身份选择即将开放，暂时无法保存。感谢你的耐心，期待在校园里正式相见。</view>
-  <view wx:if="{{errorMessage}}" class="connection-message">{{errorMessage}}</view>
-  <view class="action-stack"><t-button theme="default" variant="outline" size="large" block loading="{{loading}}" disabled="{{loading}}" bind:tap="onRetry">刷新连接状态</t-button></view>
+  <view class="page-footnote">以你喜欢的方式，加入校园日常</view>
 </view>

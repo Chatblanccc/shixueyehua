@@ -2,30 +2,31 @@
   <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
   <text class="eyebrow">在这里，与校园相连</text>
   <text class="page-title">我的班级</text>
-  <text class="page-description">找到所属的班级，听见属于我们的故事。</text>
-
+  <text class="page-description">听见熟悉的名字，找到属于我们的日常。</text>
   <view class="class-card card">
     <view class="class-card-header">
-      <view class="school-mark"><t-icon name="home" size="48rpx" /></view>
-      <view>
-        <text class="class-card-title">{{user ? '当前班级' : '还未加入班级'}}</text>
-        <text class="caption">{{user ? '学校与班级信息' : '登录后，选择你的校园'}}</text>
+      <view wx:if="{{user}}" class="preset-avatar preset-{{user.avatarPreset || 'moon'}}"><text>{{user.avatarPreset === 'book' ? '书' : user.avatarPreset === 'bamboo' ? '竹' : '月'}}</text></view>
+      <view wx:else class="school-mark"><t-icon name="home" size="48rpx" /></view>
+      <view class="class-card-copy">
+        <text class="class-card-title">{{currentClass ? currentClass.class.name : user ? '我的校园归属' : '还未加入班级'}}</text>
+        <text class="caption">{{user ? user.nickname : '从填写身份、选择班级开始'}}</text>
       </view>
     </view>
-    <view class="class-field"><text>学校</text><text>{{user.currentSchoolId ? '已选择' : '尚未选择'}}</text></view>
-    <view class="class-field"><text>年级</text><text>{{user.currentGradeId ? '已选择' : '尚未选择'}}</text></view>
-    <view class="class-field"><text>班级</text><text>{{user.currentClassId ? '已选择' : '尚未选择'}}</text></view>
-    <view class="class-field"><text>我的身份</text><text>{{user.identity === 'student' ? '学生' : user.identity === 'parent' ? '家长' : user.identity === 'teacher' ? '教师' : '尚未选择'}}</text></view>
+    <view wx:if="{{classLoading}}" class="class-loading"><t-loading theme="circular" text="正在读取班级…" /></view>
+    <block wx:else>
+      <view class="class-field"><text>学校</text><text>{{currentClass ? currentClass.school.name : user ? '暂未读取' : '尚未选择'}}</text></view>
+      <view class="class-field"><text>年级</text><text>{{currentClass ? currentClass.grade.name : user ? '暂未读取' : '尚未选择'}}</text></view>
+      <view class="class-field"><text>班级</text><text>{{currentClass ? currentClass.class.name : user ? '暂未读取' : '尚未选择'}}</text></view>
+      <view class="class-field"><text>我的身份</text><text>{{user.identity === 'student' ? '学生' : user.identity === 'parent' ? '家长' : user.identity === 'teacher' ? '教师' : '尚未选择'}}</text></view>
+    </block>
   </view>
-
+  <view wx:if="{{classError}}" class="class-error"><text>{{classError}}</text><t-button theme="default" variant="text" size="small" disabled="{{classLoading}}" bind:tap="onRetryClass">重新读取</t-button></view>
+  <view wx:if="{{previewMode}}" class="notice">当前未登录。你可以预览资料和选班页面，服务启用后才能保存并加入真实班级。</view>
+  <view wx:elif="{{!classLoading && !currentClass && !classError}}" class="notice">暂时没有可展示的班级信息。你可以重新选择当前班级。</view>
   <view class="action-stack">
-    <t-button wx:if="{{user}}" theme="primary" size="large" block bind:tap="onSelectClass">查看班级选择</t-button>
-    <t-button wx:else theme="primary" size="large" block bind:tap="onConnect">连接校园</t-button>
+    <t-button custom-style="width:100%;margin-left:0;margin-right:0" id="select-class-entry" theme="primary" size="large" block bind:tap="onSelectClass">{{previewMode ? '预览班级选择' : currentClass ? '切换班级' : '重新选择班级'}}</t-button>
+    <view><t-button custom-style="width:100%;margin-left:0;margin-right:0" theme="default" variant="text" size="large" block bind:tap="onEditProfile">{{previewMode ? '体验身份填写' : '修改身份与资料'}}</t-button></view>
   </view>
-  <view class="notice">学校、年级与班级选择即将开放。完成选择后，这里将展示你的班级信息。</view>
-  <view class="class-guidance">
-    <t-icon name="info-circle" size="30rpx" />
-    <text>校园内容将根据所属学校与班级展示。</text>
-  </view>
+  <view class="class-guidance"><t-icon name="info-circle" size="30rpx" /><text>校园内容将根据所属学校与班级展示。</text></view>
 </view>
 <view wx:else class="gate"><t-loading theme="circular" text="正在连接校园…" /></view>

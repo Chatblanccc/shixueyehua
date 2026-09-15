@@ -1,4 +1,6 @@
 import { bindUserStore, unbindUserStore } from '../../components/session-page/bindings';
+import { refreshCurrentClass } from '../../services/class-summary.service';
+import { userStore } from '../../stores/user.store';
 import { requireSession } from '../../services/session.service';
 
 Page({
@@ -7,7 +9,9 @@ Page({
     bindUserStore(this);
   },
   onShow() {
-    void requireSession();
+    void requireSession().then((allowed) => {
+      if (allowed && userStore.user) void refreshCurrentClass(true);
+    });
   },
   onUnload() {
     unbindUserStore(this);

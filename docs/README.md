@@ -1,8 +1,10 @@
 # 文档总览
 
-本目录维护实学夜话 V0.1 的开发基线与实施资料。**阶段 1 本地验收全部通过，尚未进入阶段 2。** 用户暂无正式 AppID 和关联云环境，已选择先完成本地开发；云端初始化、可信微信登录联调和手机验收仍待进行。
+本目录维护实学夜话 V0.1 的开发基线与实施资料。**阶段 2（TASK-200～202）本地验收通过。** 当前本地分支 `codex/stage-2-identity-classes` 尚未推送或运行本阶段 CI。阶段 1 已通过 [PR #1](https://github.com/Chatblanccc/shixueyehua/pull/1) 合并（`20a5681`），GitHub Actions 通过。用户暂无正式 AppID 和关联云环境，已选择先完成本地开发；云端初始化、可信微信登录联调和手机验收仍待进行。
 
-本轮在 Node `24.21.0` 下通过完整质量检查、13 文件 / 124 项测试、格式检查与六个实际云函数包的仓库外安装 / 加载 / 审计。模拟器 12 项检查全部通过，异常为 0。根生产、实际部署包及小程序依赖审计均为 0；根全量依赖仍有 17 项 moderate，high / critical 为 0。各层证据见[测试记录](test-cases.md)、[实施计划](implementation-plan.md)及[依赖审计](dependency-audit.md)。
+阶段 1 历史记录：在 Node `24.21.0` 下通过完整质量检查、13 文件 / 124 项测试、格式检查与六个实际云函数包的仓库外安装 / 加载 / 审计。模拟器 12 项检查全部通过，异常为 0。根生产、实际部署包及小程序依赖审计均为 0；根全量依赖仍有 17 项 moderate，high / critical 为 0。各层证据见[测试记录](test-cases.md)、[实施计划](implementation-plan.md)及[依赖审计](dependency-audit.md)。
+
+阶段 2 的当前实现、接口与边界见[第二阶段说明](stage-2.md)：北京时间 **23:43:33**，19 个文件 / 235 项测试及质量、格式和构建检查通过；六个云包检查在 npm TLS 中断后单独重试通过。**23:46:14**，模拟器 15 项检查全部通过，异常为 0；云端与真机仍未验证。两个数据库 dry-run、根及小程序生产依赖审计均退出 0。下一步从阶段 3 `TASK-300` 音频查询开始；阶段 1 的历史计数保留。
 
 ## 按需要阅读
 
@@ -25,6 +27,7 @@
 - `PRODUCT.md` / `ROADMAP.md`：需求摘要与阶段路线，随基线更新。
 - `TECH_STACK.md` / `DEVELOPMENT.md`：技术决策、环境要求、已经验证或仍属规划的开发流程。
 - `implementation-plan.md`：任务状态与实际证据。每次交付更新，不能仅凭文档存在标记业务完成。
+- `stage-2.md`：TASK-200～202 的实际功能、接口、内置头像与未实现边界、本地和真实验收状态。
 - `decisions.md`：记录基线澄清、平台差异及待确认项，同时把已采纳变更同步到受影响的基线。
 - `database.md` / `security-rules.md`：实际脚本、默认拒绝规则、部署与验收边界；脚本 dry-run 不代表云资源已创建。
 - `cloud-functions.md` / `test-cases.md`：实际接口与验证记录，明确已实现、未实现和待真实联调范围。
@@ -46,6 +49,7 @@
 | [test-cases.md](test-cases.md)               | TASK-002 起积累；TASK-603 汇总 | 自动化与人工用例、当前结果、未验证边界                             |
 | [dependency-audit.md](dependency-audit.md)   | TASK-002 / 部署前              | 根生产 / 实际部署包 / 小程序审计为 0；根全量仍有 17 项 moderate    |
 | [acceptance-review.md](acceptance-review.md) | TASK-100～103                  | 服务端和数据库 3 项缺口已修复，96 项目标测试通过；真实云验证仍待办 |
+| [stage-2.md](stage-2.md)                     | TASK-200～202                  | 身份、班级与守卫本地验收通过；真实云与真机仍待办                   |
 | `release-checklist.md`（后续创建）           | TASK-604                       | 正式配置、体验版、真机、提交审核与发布记录                         |
 
-阶段 1 本地统一验收入口为 `npm run verify:stage1`；各子命令均已实际验证，运行前需满足[开发指引](DEVELOPMENT.md)中的 Node 和微信开发者工具条件。实现文档中的命令必须与实际脚本一致；示例、mock、云端验证、真机验收和平台发布分别记录。
+当前本地统一验收入口为 `npm run verify:stage2`；各子命令均已分别实际运行通过，未记录整条串联命令一次退出 0。阶段 1 历史入口 `npm run verify:stage1` 保留。运行前需满足[开发指引](DEVELOPMENT.md)中的 Node 和微信开发者工具条件。实现文档中的命令必须与实际脚本一致；示例、mock、云端验证、真机验收和平台发布分别记录。

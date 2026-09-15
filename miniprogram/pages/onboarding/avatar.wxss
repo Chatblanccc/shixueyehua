@@ -1,0 +1,25 @@
+.preset-avatar {
+  display: flex;
+  width: 80rpx;
+  height: 80rpx;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 4rpx solid #fff;
+  border-radius: 50%;
+  font-family: 'Songti SC', 'STSong', serif;
+  font-size: 40rpx;
+  line-height: 1;
+}
+.preset-moon {
+  background: #eee4ce;
+  color: #987748;
+}
+.preset-book {
+  background: #dfe9ec;
+  color: #426473;
+}
+.preset-bamboo {
+  background: #e3eadb;
+  color: #647a57;
+}

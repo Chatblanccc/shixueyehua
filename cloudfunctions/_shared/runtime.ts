@@ -23,7 +23,10 @@ function sdk() {
 /** Lazy SDK initialization allows isolated package loading without contacting a cloud environment. */
 export function createRuntimeHandler(domain: Domain) {
   return createHandler(domain, {
-    repository: new CloudRepository(() => sdk().database()),
+    repository: new CloudRepository(() => {
+      const options: { env?: string; throwOnNotFound: boolean } = { throwOnNotFound: false };
+      return sdk().database(options);
+    }),
     getContext: () => cloud.getWXContext(),
     getEnvironment: () => process.env.APP_ENV,
     logger: consoleLogger,

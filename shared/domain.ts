@@ -2,6 +2,8 @@
 export const USER_IDENTITIES = ['student', 'parent', 'teacher'] as const;
 export const USER_ROLES = ['user', 'admin', 'super_admin'] as const;
 export const USER_STATUSES = ['active', 'disabled', 'deleted'] as const;
+export const AVATAR_PRESETS = ['moon', 'book', 'bamboo'] as const;
+export type AvatarPreset = (typeof AVATAR_PRESETS)[number];
 export type UserIdentity = (typeof USER_IDENTITIES)[number];
 export type UserRole = (typeof USER_ROLES)[number];
 export type UserStatus = (typeof USER_STATUSES)[number];
@@ -18,6 +20,7 @@ export interface User extends RecordDates {
   openid: string;
   nickname: string;
   avatarFileId?: string;
+  avatarPreset?: AvatarPreset;
   identity?: UserIdentity;
   role: UserRole;
   /** Trusted administrator authorization. Never modified by user-selected class. */
@@ -33,6 +36,7 @@ export interface UserProfile {
   _id: string;
   nickname: string;
   avatarFileId?: string;
+  avatarPreset?: AvatarPreset;
   identity?: UserIdentity;
   role: UserRole;
   adminSchoolId?: string;
@@ -48,6 +52,33 @@ export type OnboardingStep = 'identity' | 'class' | 'ready';
 export interface LoginResult {
   user: UserProfile;
   onboardingStep: OnboardingStep;
+}
+
+export interface UpdateProfileInput {
+  identity: UserIdentity;
+  nickname?: string;
+  avatarPreset?: AvatarPreset;
+}
+export interface SchoolOption {
+  _id: string;
+  name: string;
+}
+export interface GradeOption extends SchoolOption {
+  schoolId: string;
+}
+export interface ClassOption extends GradeOption {
+  gradeId: string;
+  joinMode: 'free';
+}
+export interface ClassSelectionInput {
+  schoolId: string;
+  gradeId: string;
+  classId: string;
+}
+export interface CurrentClass {
+  school: SchoolOption;
+  grade: GradeOption;
+  class: ClassOption;
 }
 
 export interface School extends RecordDates {

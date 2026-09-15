@@ -25,7 +25,7 @@ npm run devtools:open
 
 如果手动打开工具：选择“导入”，选仓库根目录，再执行“工具 → 构建 npm”和编译。仅安装 npm 包不等于微信组件构建。[微信 npm 文档](https://developers.weixin.qq.com/miniprogram/dev/devtools/npm.html)
 
-未配置云环境时，启动页明确显示预览说明；点击“进入页面预览”可切换夜话、一封家书、班级和我的。预览不设置 user、不保存业务数据，也不授予管理员权限。身份选班、播放、投稿等尚未实现的功能保持未开放状态。
+未配置云环境时，启动页明确显示预览说明；点击“进入页面预览”可切换夜话、一封家书、班级和我的。预览不设置 user、不保存业务数据，也不授予管理员权限。身份资料与三级选班已实现；当前无云时可体验内存中的资料草稿、查看选班空状态，提交不会生成假账号或假班级。播放、投稿仍未开放。
 
 ## 2. 每次改动运行的检查
 
@@ -36,7 +36,7 @@ npm run format:check
 
 `verify` 依次执行 ESLint、客户端/服务端/测试严格类型检查、Vitest、本地配置生成、云函数构建和项目结构检查。微信编译插件不会替代 TypeScript 类型检查。[微信 TypeScript 文档](https://developers.weixin.qq.com/miniprogram/dev/devtools/compilets.html)
 
-本轮已在 Node 24.21.0 下通过 `verify`、`format:check` 和 `check:cloud`：13 个测试文件共 124 项测试，其中后端与数据库 96 项、客户端 21 项、SDK 兼容 7 项。测试记录见 [test-cases.md](test-cases.md)。
+第二阶段已在 Node 24.21.0 下通过 `verify`、`format:check` 和 `check:cloud`：19 个测试文件共 235 项测试，其中后端 127 项、数据库 38 项、客户端 60 项、本地集成 3 项、SDK 兼容 7 项。当前结果见 [stage-2.md](stage-2.md)，第一阶段历史证据保留在 [test-cases.md](test-cases.md)。第二阶段模拟器于 2026-09-15 23:46:14（北京时间）通过全部 15 项检查，异常为 0；未连接真实云环境或手机。
 
 其他实际命令：
 
@@ -148,3 +148,18 @@ SHIXUE_ENV=dev npm run build
 | 初始化命令只显示计划 | 默认dry-run正常；有真实开发环境后再按数据库说明apply |
 
 每个TASK更新[实施计划](implementation-plan.md)，列文件、命令、结果和剩余边界。实测记录集中在[test-cases.md](test-cases.md)，实际接口见[cloud-functions.md](cloud-functions.md)。
+
+## 8. 第二阶段开发与验证
+
+第二阶段分支为 `codex/stage-2-identity-classes`，包含 TASK-200～202。实现、接口与验证记录见 [stage-2.md](stage-2.md)。开发者工具的“我的 → 体验身份与资料填写”可以操作三种身份、昵称和内置头像；“预览班级选择”显示真实的未开通状态，返回或重新打开资料页保留本次草稿。
+
+```bash
+npm run verify
+npm run format:check
+npm run check:cloud
+npm run devtools:verify:stage2
+```
+
+`verify:stage2` 串联与第一阶段相同的本地质量、云包检查、数据库 dry-run、生产审计，并使用第二阶段模拟器检查。`devtools:verify:stage2` 在无云预览模式运行原有启动 / Tab / 管理页检查，再验证资料输入、无云提交边界、选班空态和草稿恢复；会重新编译并切换页面，先结束源码编辑再运行。产物在被忽略的 `artifacts/devtools-stage2/`。
+
+`tests/integration/stage2-flow.test.ts` 使用真实客户端解析器 / 控制器和真实云函数 handler，只替换微信传输与数据库，验证完整流程与事务失败恢复。它是本地集成证据，不能替代正式 AppID 下的登录、事务、安全规则或手机验收。阶段 1 的历史验收继续保留在 [test-cases.md](test-cases.md)。

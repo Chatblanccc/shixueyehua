@@ -4,9 +4,11 @@
     <text class="page-title">班级管理</text>
     <text class="page-description">让每一份连接有所归属</text>
     <view class="card admin-placeholder"><empty-state icon="home" title="功能正在准备中" description="学校、年级和班级的管理功能即将开放。" /></view>
+    <view wx:if="{{permissionMessage}}" class="notice">{{permissionMessage}}</view>
+    <t-button theme="default" variant="outline" size="large" block bind:tap="onRefreshPermission">重新核验权限</t-button>
   </view>
   <view wx:else>
-    <empty-state icon="lock-on" title="需要管理权限" description="此页面仅向已授权的管理员开放。" />
+    <empty-state icon="lock-on" title="{{checking ? '正在核验管理权限' : '需要管理权限'}}" description="{{permissionMessage || '此页面仅向已授权的管理员开放。'}}" />
     <t-button theme="default" variant="outline" size="large" block bind:tap="onReturn">返回我的</t-button>
   </view>
 </view>

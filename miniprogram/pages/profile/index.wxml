@@ -2,16 +2,20 @@
   <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
   <text class="eyebrow">与自己，相处片刻</text>
   <text class="page-title">我的</text>
-
   <view class="profile-header">
-    <view class="avatar"><t-icon name="user" size="62rpx" /></view>
-    <view class="profile-identity">
-      <text class="nickname">{{user ? user.nickname : '尚未登录'}}</text>
-      <text class="identity-label">{{user.identity === 'student' ? '学生' : user.identity === 'parent' ? '家长' : user.identity === 'teacher' ? '教师' : '等你开启与校园的连接'}}</text>
-    </view>
+    <view wx:if="{{user}}" class="preset-avatar preset-{{user.avatarPreset || 'moon'}}"><text>{{user.avatarPreset === 'book' ? '书' : user.avatarPreset === 'bamboo' ? '竹' : '月'}}</text></view>
+    <view wx:else class="avatar"><t-icon name="user" size="62rpx" /></view>
+    <view class="profile-identity"><text class="nickname">{{user ? user.nickname : '尚未登录'}}</text><text class="identity-label">{{user.identity === 'student' ? '学生' : user.identity === 'parent' ? '家长' : user.identity === 'teacher' ? '教师' : '等你开启与校园的连接'}}</text></view>
   </view>
   <view wx:if="{{user.status === 'disabled'}}" class="notice">当前账号的投稿和管理功能暂时受限。</view>
-  <view wx:if="{{!user}}" class="connect-button"><t-button theme="primary" size="large" block bind:tap="onConnect">连接校园</t-button></view>
+  <view wx:if="{{previewMode}}" class="connect-button"><t-button custom-style="width:100%;margin-left:0;margin-right:0" id="profile-preview-entry" theme="primary" size="large" block bind:tap="onEditProfile">体验身份与资料填写</t-button></view>
+
+  <view class="section-heading"><text class="section-title">我与校园</text><text wx:if="{{previewMode}}" class="section-note">尚未连接</text></view>
+  <view class="card menu-list">
+    <button class="menu-row interactive-row" bindtap="onEditProfile"><view class="menu-label"><t-icon name="user" size="36rpx" /><text>身份与资料</text></view><view class="menu-trailing"><text>{{previewMode ? '预览填写' : '修改'}}</text><t-icon name="chevron-right" size="28rpx" /></view></button>
+    <button id="profile-class-entry" class="menu-row interactive-row class-menu-row" bindtap="onSelectClass"><view class="menu-label"><t-icon name="home" size="36rpx" /><view><text>我的班级</text><text wx:if="{{currentClass}}" class="current-class-caption">{{currentClass.school.name}}<text class="block-line">{{currentClass.grade.name}} · {{currentClass.class.name}}</text></text><text wx:elif="{{classLoading}}" class="current-class-caption">正在读取班级…</text><text wx:else class="current-class-caption">{{previewMode ? '预览学校与班级选择' : classError ? '班级信息读取失败' : '尚未取得班级信息'}}</text></view></view><t-icon name="chevron-right" size="28rpx" /></button>
+  </view>
+  <view wx:if="{{classError}}" class="profile-error"><text>{{classError}}</text><t-button theme="default" variant="text" size="small" disabled="{{classLoading}}" bind:tap="onRetryClass">重新读取班级</t-button></view>
 
   <view class="section-heading"><text class="section-title">我的珍藏</text></view>
   <view class="card menu-list">
@@ -19,14 +23,8 @@
     <view class="menu-row"><view class="menu-label"><t-icon name="time" size="38rpx" /><text>收听历史</text></view><text class="soon-label">即将开放</text></view>
     <view class="menu-row"><view class="menu-label"><t-icon name="mail" size="38rpx" /><text>我的家书</text></view><text class="soon-label">即将开放</text></view>
   </view>
-
-  <view wx:if="{{isAdmin}}" class="admin-entry">
-    <t-button theme="default" size="large" block bind:tap="onOpenAdmin">进入管理中心</t-button>
-  </view>
-  <view class="about-card">
-    <text class="about-name">实学夜话</text>
-    <text class="caption">让学校的声音被认真听见，<text class="block-line">让家校之间的表达更加真诚。</text></text>
-  </view>
+  <view wx:if="{{isAdmin}}" class="admin-entry"><t-button custom-style="width:100%;margin-left:0;margin-right:0" theme="default" size="large" block bind:tap="onOpenAdmin">进入管理中心</t-button></view>
+  <view class="about-card"><text class="about-name">实学夜话</text><text class="caption">让学校的声音被认真听见，<text class="block-line">让家校之间的表达更加真诚。</text></text></view>
   <view class="page-footnote">听见校园 · 写给家人</view>
 </view>
 <view wx:else class="gate"><t-loading theme="circular" text="正在连接校园…" /></view>

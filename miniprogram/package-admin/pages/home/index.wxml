@@ -17,9 +17,11 @@
       <button class="admin-row" data-route="settings" bindtap="onNavigate"><view><t-icon name="setting" size="38rpx" /><text>系统设置</text></view><t-icon name="chevron-right" size="30rpx" /></button>
     </view>
     <view class="notice">管理功能正在准备中，暂时无法发布或修改内容。</view>
+    <view wx:if="{{permissionMessage}}" class="notice">{{permissionMessage}}</view>
+    <t-button theme="default" variant="outline" size="large" block bind:tap="onRefreshPermission">重新核验权限</t-button>
   </view>
   <view wx:else>
-    <empty-state icon="lock-on" title="需要管理权限" description="此页面仅向已授权的管理员开放。" />
+    <empty-state icon="lock-on" title="{{checking ? '正在核验管理权限' : '需要管理权限'}}" description="{{permissionMessage || '此页面仅向已授权的管理员开放。'}}" />
     <t-button theme="default" variant="outline" size="large" block bind:tap="onReturn">返回我的</t-button>
   </view>
 </view>
