@@ -1,0 +1,31 @@
+<view wx:if="{{isOnboarded || previewMode}}" class="page">
+  <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
+  <text class="eyebrow">在这里，与校园相连</text>
+  <text class="page-title">我的班级</text>
+  <text class="page-description">找到所属的班级，听见属于我们的故事。</text>
+
+  <view class="class-card card">
+    <view class="class-card-header">
+      <view class="school-mark"><t-icon name="home" size="48rpx" /></view>
+      <view>
+        <text class="class-card-title">{{user ? '当前班级' : '还未加入班级'}}</text>
+        <text class="caption">{{user ? '学校与班级信息' : '登录后，选择你的校园'}}</text>
+      </view>
+    </view>
+    <view class="class-field"><text>学校</text><text>{{user.currentSchoolId ? '已选择' : '尚未选择'}}</text></view>
+    <view class="class-field"><text>年级</text><text>{{user.currentGradeId ? '已选择' : '尚未选择'}}</text></view>
+    <view class="class-field"><text>班级</text><text>{{user.currentClassId ? '已选择' : '尚未选择'}}</text></view>
+    <view class="class-field"><text>我的身份</text><text>{{user.identity === 'student' ? '学生' : user.identity === 'parent' ? '家长' : user.identity === 'teacher' ? '教师' : '尚未选择'}}</text></view>
+  </view>
+
+  <view class="action-stack">
+    <t-button wx:if="{{user}}" theme="primary" size="large" block bind:tap="onSelectClass">查看班级选择</t-button>
+    <t-button wx:else theme="primary" size="large" block bind:tap="onConnect">连接校园</t-button>
+  </view>
+  <view class="notice">学校、年级与班级选择即将开放。完成选择后，这里将展示你的班级信息。</view>
+  <view class="class-guidance">
+    <t-icon name="info-circle" size="30rpx" />
+    <text>校园内容将根据所属学校与班级展示。</text>
+  </view>
+</view>
+<view wx:else class="gate"><t-loading theme="circular" text="正在连接校园…" /></view>

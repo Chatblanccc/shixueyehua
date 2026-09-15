@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "系统设置",
+  "usingComponents": {
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "empty-state": "/components/empty-state/index"
+  }
+}

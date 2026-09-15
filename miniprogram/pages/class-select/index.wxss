@@ -1,0 +1,29 @@
+.selection-page {
+  padding-top: 40rpx;
+}
+.selection-card {
+  margin-top: 44rpx;
+  padding: 4rpx 30rpx;
+}
+.selection-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 34rpx 0;
+  border-bottom: 1rpx solid #eeede8;
+  color: #92958c;
+  font-size: 28rpx;
+}
+.selection-field:last-child {
+  border-bottom: 0;
+}
+.field-number {
+  margin-right: 24rpx;
+  color: #b8a483;
+  font-size: 22rpx;
+}
+.connection-message {
+  margin-top: 20rpx;
+  color: #946b4b;
+  font-size: 24rpx;
+}

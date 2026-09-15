@@ -1,0 +1,12 @@
+<view class="page">
+  <view wx:if="{{allowed}}">
+    <text class="eyebrow">校园管理</text>
+    <text class="page-title">管理员管理</text>
+    <text class="page-description">把信任交给合适的人</text>
+    <view class="card admin-placeholder"><empty-state icon="user" title="功能正在准备中" description="管理员授权与撤销功能即将开放，仅向超级管理员提供。" /></view>
+  </view>
+  <view wx:else>
+    <empty-state icon="lock-on" title="需要管理权限" description="此页面仅向已授权的管理员开放。" />
+    <t-button theme="default" variant="outline" size="large" block bind:tap="onReturn">返回我的</t-button>
+  </view>
+</view>

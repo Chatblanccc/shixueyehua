@@ -1,0 +1,34 @@
+<view wx:if="{{isOnboarded || previewMode}}" class="page">
+  <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
+  <view class="header-row">
+    <view>
+      <text class="eyebrow">听见校园</text>
+      <text class="page-title">夜话</text>
+    </view>
+    <view class="header-seal"><view>实学</view><view>夜话</view></view>
+  </view>
+  <text class="page-description">把脚步放慢，听一听成长的声音。</text>
+
+  <view class="night-cover">
+    <view class="cover-moon" aria-hidden="true"></view>
+    <text class="cover-label">本期夜话</text>
+    <text class="cover-title">今晚的夜话<text class="block-line">还在准备中。</text></text>
+    <text class="cover-description">有些话，想慢慢说给你听。</text>
+    <view class="cover-footer">
+      <view class="sound-bars" aria-hidden="true">
+        <view></view><view></view><view></view><view></view><view></view><view></view><view></view>
+      </view>
+      <text>校园音频 · 即将开放</text>
+    </view>
+  </view>
+
+  <view class="section-heading">
+    <text class="section-title">往期夜话</text>
+    <text class="section-note">留住每一次陪伴</text>
+  </view>
+  <view class="card">
+    <empty-state icon="sound" title="一段声音，一份陪伴" description="这里将收录学校发布的夜话。音频收听开放后，就能在这里慢慢听。" />
+  </view>
+  <view class="page-footnote">声音有温度 · 成长有回响</view>
+</view>
+<view wx:else class="gate"><t-loading theme="circular" text="正在连接校园…" /></view>

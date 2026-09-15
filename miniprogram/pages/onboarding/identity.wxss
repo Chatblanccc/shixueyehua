@@ -1,0 +1,37 @@
+.onboarding-page {
+  padding-top: 40rpx;
+}
+.identity-options {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin-top: 40rpx;
+}
+.identity-option {
+  display: flex;
+  align-items: center;
+  gap: 26rpx;
+  padding: 28rpx;
+}
+.identity-symbol {
+  display: flex;
+  width: 84rpx;
+  height: 84rpx;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f4f2eb;
+  color: #aa8550;
+}
+.identity-title {
+  display: block;
+  margin-bottom: 4rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+}
+.connection-message {
+  margin-top: 20rpx;
+  color: #946b4b;
+  font-size: 24rpx;
+}

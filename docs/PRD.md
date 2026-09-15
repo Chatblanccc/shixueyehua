@@ -16,15 +16,14 @@
 
 > **一句话定义：**“实学夜话”是一款以校长或学校管理员发布的校园音频为核心，以“一封家书”为家校表达载体，并以学校、年级、班级组织用户的校园文化小程序。
 
-```{=openxml}
-<w:p><w:r><w:br w:type="page"/></w:r></w:p>
-```
+> 开发入口：[文档导航](README.md) · [实施计划](implementation-plan.md) · [基线澄清](decisions.md)。本文为持续维护的开发基线，Word 原件保留导入版本。
 
 ## 文档修订记录
 
 | 版本 | 日期 | 修订说明 |
 |---|---|---|
 | V0.1 | 2026年8月28日 | 明确校长音频、一封家书、自主选班、管理员上传、微信云开发等开发基线 |
+| V0.1 开发准备补充 | 2026年9月15日 | 统一根目录文档入口；明确管理员授权学校、配置持久化与初始安全规则，不扩展产品范围 |
 
 ## 文档目录
 
@@ -164,6 +163,8 @@ V0.1不追求成为“校园版喜马拉雅”，不建设公开内容生态，�
 3. 超级管理员权限不能通过客户端参数获得，只能通过初始化脚本或已有超级管理员授予。
 4. 普通用户对受保护集合不得直接写入，写操作通过云函数完成。
 5. 音频、家书、举报和管理记录均采用软删除，保留必要操作轨迹。
+
+管理员授权使用独立的 `users.adminSchoolId`：仅超级管理员或受控初始化脚本可设置；`currentSchoolId` 是用户可选择的使用上下文，不能用于授予管理权限。普通管理员必须同时满足 `role=admin` 和目标资源学校等于 `adminSchoolId`；缺少授权字段时拒绝管理。用户选班不改变授权，撤销管理员时清除授权字段。超级管理员跨校操作仍须验证目标学校和资源有效。
 
 # 4. 信息架构与页面清单
 
@@ -482,7 +483,7 @@ V0.1不追求成为“校园版喜马拉雅”，不建设公开内容生态，�
 
 | 集合 | 用途 | 关键字段 |
 |---|---|---|
-| users | 用户档案与角色 | openid、identity、role、currentSchoolId、currentClassId、status |
+| users | 用户档案与角色 | openid、identity、role、adminSchoolId、currentSchoolId、currentClassId、status |
 | schools | 学校 | name、logoFileId、status |
 | grades | 年级 | schoolId、name、sortOrder、status |
 | classes | 班级 | schoolId、gradeId、name、joinMode、status |
@@ -493,14 +494,14 @@ V0.1不追求成为“校园版喜马拉雅”，不建设公开内容生态，�
 | letters | 家书 | authorId、title、content、imageFileIds、reviewStatus、visibility |
 | reports | 举报 | reporterId、targetType、targetId、reason、status |
 | admin_logs | 管理操作日志 | operatorId、action、targetType、before、after、createdAt |
-| system_configs | 系统配置 | key、value、schoolId、updatedBy |
+| system_configs | 系统配置（每作用域一条，key=app） | _id、key、value、schoolId、updatedBy、createdAt、updatedAt |
 | notifications | 审核结果等站内消息 | userId、type、title、readAt |
 
 ## 8.2 关键索引
 
 | 集合 | 索引建议 |
 |---|---|
-| users | openid唯一；role+schoolId；status |
+| users | openid唯一；role+adminSchoolId；status |
 | classes | schoolId+gradeId+status |
 | audio_programs | schoolId+status+publishedAt倒序；classIds；deletedAt |
 | play_progress | userId+audioId唯一；userId+updatedAt倒序 |
@@ -508,6 +509,8 @@ V0.1不追求成为“校园版喜马拉雅”，不建设公开内容生态，�
 | letters | schoolId+reviewStatus+publishedAt倒序；authorId+updatedAt倒序 |
 | reports | targetType+targetId+reporterId；status+createdAt |
 | admin_logs | schoolId+createdAt倒序；operatorId+createdAt倒序 |
+
+`system_configs` 使用确定性 `_id` 区分全局和学校配置；`value` 存配置字段，读取后转换为任务书的 `SystemConfig`。覆盖顺序、图片开关和默认值见[开发决策 DEC-004](decisions.md#dec-004-配置存储与读取约定)，初始化脚本必须幂等。
 
 ## 8.3 状态枚举
 
@@ -598,9 +601,11 @@ CloudBase云函数
 1. 客户端只允许读取必要的公开数据和本人数据。
 2. users.role、审核状态、发布状态、管理日志不得由客户端直接修改。
 3. 管理操作统一通过云函数；云函数从运行上下文获取OpenID。
-4. 云函数根据数据库中的role和schoolId校验权限，不采用客户端角色。
+4. 云函数根据数据库中的role和adminSchoolId校验管理员权限，再与资源schoolId比对，不采用客户端角色或用户自选学校作为授权。
 5. 对上传文件采用路径隔离、类型与大小校验、上传后业务确认和临时文件清理。
 6. 数据库与存储安全规则采用“默认拒绝、按需开放”。
+
+初始默认拒绝规则随 TASK-102 创建集合时部署并验证；文件上传权限随业务最小化开放，在对应真实上传验收前完成 TASK-601。内容安全 TASK-600 是真实家书提交的前置要求，不能因为列在阶段6就推迟到业务完成后。
 
 ## 9.6 统一接口返回结构
 

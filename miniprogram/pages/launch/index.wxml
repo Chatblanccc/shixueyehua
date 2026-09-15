@@ -1,0 +1,32 @@
+<view class="launch-page">
+  <view class="brand-section">
+    <view class="brand-symbol" aria-hidden="true">
+      <view class="moon"></view>
+      <view class="line line-long"></view>
+      <view class="line line-short"></view>
+    </view>
+    <text class="brand-name">实学夜话</text>
+    <text class="brand-caption">听见校园 · 写给家人</text>
+    <view class="brand-rule"></view>
+    <text class="brand-quote">让一段声音，陪伴成长。<text class="block-line">让一封家书，连接彼此。</text></text>
+  </view>
+  <view class="connection-section">
+    <view wx:if="{{previewMode}}" class="preview-introduction">
+      <text class="error-message">当前为页面预览，登录与内容服务暂未启用。</text>
+      <view class="retry-button">
+        <t-button id="preview-entry" theme="primary" size="large" block bind:tap="onPreview">进入页面预览</t-button>
+      </view>
+    </view>
+    <view wx:elif="{{loading}}" class="loading-wrap">
+      <t-loading theme="circular" size="40rpx" text="正在连接校园…" />
+    </view>
+    <view wx:elif="{{errorMessage}}" class="connection-error">
+      <text class="error-title">暂时没有连接上</text>
+      <text class="error-message">{{errorMessage}}</text>
+      <view class="retry-button">
+        <t-button theme="primary" size="large" block bind:tap="onRetry">重新连接</t-button>
+      </view>
+    </view>
+    <text class="launch-footer">一处安静的家校相遇之地</text>
+  </view>
+</view>

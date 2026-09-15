@@ -1,0 +1,47 @@
+.class-card {
+  margin-top: 40rpx;
+  padding: 0 30rpx;
+}
+.class-card-header {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  padding: 34rpx 0;
+}
+.school-mark {
+  display: flex;
+  width: 92rpx;
+  height: 92rpx;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24rpx;
+  background: #eef0e9;
+  color: #4d695e;
+}
+.class-card-title {
+  display: block;
+  margin-bottom: 4rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+}
+.class-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26rpx 0;
+  border-top: 1rpx solid #eeede8;
+  color: #777c79;
+  font-size: 26rpx;
+}
+.class-field text:last-child {
+  color: #3c4f55;
+}
+.class-guidance {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 40rpx;
+  color: #8b8f87;
+  font-size: 23rpx;
+}

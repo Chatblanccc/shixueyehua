@@ -1,0 +1,10 @@
+node_modules/
+miniprogram/node_modules/
+miniprogram/miniprogram_npm/
+miniprogram/generated/
+dist/
+coverage/
+artifacts/
+package-lock.json
+miniprogram/package-lock.json
+project.private.config.json

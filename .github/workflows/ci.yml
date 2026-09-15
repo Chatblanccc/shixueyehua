@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify stage 1 foundation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SHIXUE_ENV: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            miniprogram/package-lock.json
+            config/cloud-runtime/package-lock.json
+
+      - name: Install root dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install miniprogram dependencies
+        run: npm --prefix miniprogram ci --no-audit --no-fund
+
+      - name: Lint, typecheck, test and build
+        run: npm run verify
+
+      - name: Check source formatting
+        run: npm run format:check
+
+      - name: Verify standalone cloud packages
+        run: npm run check:cloud
+
+      - name: Check database initialization plan
+        run: npm run db:init -- --dry-run
+
+      - name: Check first administrator authorization plan
+        run: npm run db:bootstrap-admin -- --dry-run
+
+      - name: Audit root production dependencies
+        run: npm audit --omit=dev
+
+      - name: Audit miniprogram production dependencies
+        run: npm --prefix miniprogram audit --omit=dev

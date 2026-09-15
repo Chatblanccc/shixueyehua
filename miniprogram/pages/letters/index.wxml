@@ -1,0 +1,28 @@
+<view wx:if="{{isOnboarded || previewMode}}" class="page">
+  <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
+  <text class="eyebrow">落笔，是另一种拥抱</text>
+  <text class="page-title">一封家书</text>
+  <text class="page-description">写下平日没说出口的话，寄给重要的人。</text>
+
+  <view class="letter-invitation">
+    <view class="letter-corner" aria-hidden="true"></view>
+    <view class="letter-stamp" aria-hidden="true"><t-icon name="mail" size="44rpx" /></view>
+    <text class="letter-salutation">亲爱的家人：</text>
+    <text class="letter-thought">关于成长，关于感谢，<text class="block-line">关于我们一起走过的日子。</text></text>
+    <view class="letter-lines" aria-hidden="true"><view></view><view></view></view>
+    <text class="letter-signature">把心意，写进一封信里。</text>
+  </view>
+  <view class="compose-button">
+    <t-button theme="primary" size="large" block disabled>写家书 · 即将开放</t-button>
+  </view>
+
+  <view class="section-heading">
+    <text class="section-title">精选家书</text>
+    <text class="section-note">每一封都被认真阅读</text>
+  </view>
+  <view class="card">
+    <empty-state icon="mail" title="等待第一封温暖的来信" description="家书投稿与精选展示即将开放。每封投稿经学校审核后，才会在这里与大家见面。" />
+  </view>
+  <view class="page-footnote">真诚落笔 · 温柔抵达</view>
+</view>
+<view wx:else class="gate"><t-loading theme="circular" text="正在连接校园…" /></view>

@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "找到班级",
+  "usingComponents": {
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
+}
