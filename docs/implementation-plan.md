@@ -138,9 +138,9 @@ npm run verify:stage1
 | 2 身份与选班       | 200、201、202                | 本地验收通过；真实云与真机待验，详见 stage-2.md                    |
 | 3 夜话音频         | 300、301、302、303           | 用户侧本地验收通过；真实云、存储与真机待验，详见 stage-3.md        |
 | 3 夜话音频         | 304、305                     | 页面与本地业务体验已实现；真实文件选择、上传、云存储/事务待验      |
-| 4 一封家书         | 400、401、402、403、404、405 | 尚未实现；只有家书空态页面                                         |
+| 4 一封家书         | 400、401、402、403、404、405 | 图文投稿与分层本地页面已接通；真实云、完整筛选、公开与审核等仍待完成 |
 | 5 管理中心         | 500、501、502、503、504      | 尚未实现；只有分包占位与权限入口守卫                               |
-| 6 内容安全前置     | 600                         | 适配层、加密回调与事务绑定本地通过；上传归属/投稿接入和真实平台待验 |
+| 6 内容安全前置     | 600                         | 上传归属、投稿协调与回调接线本地通过；真实平台审核与回调待验 |
 | 6 安全、体验与发布 | 601、602、603、604           | 尚未验收；初始数据库 / 存储拒绝规则代码已随 102 交付               |
 
 ```mermaid
@@ -171,3 +171,41 @@ flowchart LR
 - TASK-600 仍部分完成：缺图片真实上传归属解析器、提交端任务登记/恢复接入、真实平台回调验收。下一项 TASK-400 开始家书草稿与文本提交闭环，TASK-401/601 同步补图片上传。未经归属与检查确认的图片不会被开放。
 - 完整协议、环境变量、HTTP 映射假设、文件清单及限制见 [内容安全记录](content-safety.md)。本轮未推送、创建 PR、合并或部署。
 - `npm run db:init -- --dry-run` 退出 0：16 个集合清单包含新增任务集合及三个索引，`cloudContacted=false`；`git diff --check` 通过。
+
+### TASK-600 交付与 TASK-400 文字家书推进
+
+- TASK-600 当前安全基础由提交 `c4b9b19` 推送，随后 [PR #4](https://github.com/Chatblanccc/shixueyehua/pull/4) 经 CI 后 squash 合并至 main `e857ab73faaabcd541519b3dfdab20556614c82b`。[PR CI](https://github.com/Chatblanccc/shixueyehua/actions/runs/35056800844) 与 [main CI](https://github.com/Chatblanccc/shixueyehua/actions/runs/35056867935) 均成功。合并的是已验证安全基础，不取消图片归属及真实平台的剩余验收项。
+- 新分支 `codex/task-400-letters`：实现文字家书 createDraft/updateDraft/submit/withdraw/delete，以及仅本人 detail/listMine。共享 DTO 白名单、服务端作者校验、可信组织绑定、草稿幂等、版本冲突、文本检查后事务复验和软删除均有测试。失败不清除草稿、不自动公开、不回退本地成功。
+- 同步提供原生家书 Tab 的文字编辑、保存/提交、本人列表和状态操作；本地模式持久化，未保存编辑按账号/模式隔离；重置体验明确清除家书。界面标注本地待审不是微信检查结果。基础页面支持 TASK-400 验收，不将 TASK-401/403 全部标记完成。
+- 修改文件清单、输入输出、状态机与限制见 [文字家书记录](letters.md)。新测试为 `tests/backend/letters.test.ts`、`tests/client/local-letters.test.ts`、`tests/database/letters-db.test.ts`；更新 fixtures、本地兼容测试和微信模拟器脚本。数据库清单增加 `letters.author_live_cursor` 索引。
+- 2026-09-16 12:59（北京时间），Node `22.23.2` 下 `npm run verify` 通过 lint、三套严格类型检查、**33 文件 / 439 项测试**和构建；格式检查通过。微信开发者工具首次新流程验收 9 项通过，异常 0，覆盖实际音频播放和文字家书输入、保存、待审、撤回、软删除。原生确认框自动应答，测试后恢复数据库及编辑缓存；随后截图复核修正标题输入框裁切并复验。
+- TASK-400 仍部分完成：非空图片列表失败关闭，图片数量配置/上传归属/异步检查接入待 TASK-401/601；审核、精选公开、举报另属后续 TASK。未调用真实 CloudBase、微信文本/图片安全或手机，未声称上线验收通过。本分支尚未推送或合并。
+- 最终复验：13:02:54 完整 `npm run verify` 通过 **33 文件 / 440 项测试**（补充提交时采用用户最新可信班级的用例），lint、三套 typecheck、构建均通过。13:02:59 模拟器 9 项再次通过，异常 0，截图确认标题不再裁切；报告 `artifacts/local-experience/verification.json` 明确 `confirmationMocked=true`、`cloudVerified=false`、`deviceVerified=false`。`format:check`、`check:cloud`、数据库初始化 dry-run（包含新增索引，未连接云）及 `git diff --check` 通过。
+
+### TASK-400 / 600 图片提交前置：异步检查协调
+
+- 新增 `cloudfunctions/_shared/safety-submission.ts`、`safety-submission-db.ts`：服务端确定性任务键、并发租约、任务/回执原子登记、读取已验证回调、版本复验与超时恢复。不会修改或发布家书；相同版本的拒绝结果不通过重复请求绕开。
+- 修改 `safety-jobs-db.ts` 复用严格草稿解析；`scripts/database/manifest.ts` 新增默认拒绝集合 `media_safety_submissions` 与过期索引；更新 `tests/database/database.test.ts` 至 17 个集合。新增 `tests/backend/safety-submission.test.ts` 的 24 项回归。
+- 2026-09-16 13:26（北京时间），Node 22 下 `npm run verify` 通过 lint、三套严格类型检查、**34 文件 / 464 项测试**与构建。测试首次发现参数化数组用例的 TypeScript 写法错误，修正后完整重跑通过。
+- 当前交付仅为图片安全协调模块，尚未接入运行时 submit。图片真实上传/归属解析、配置上限、提交事务最终复验、服务与页面接线和无云图片体验仍待实现；用户图片入口继续关闭，文字家书不受影响。不能据此将 TASK-400 或 TASK-600 标记完成。
+- 没有页面或本地业务改动，不重跑微信模拟器、不把上一轮 9 项结果当作图片验收；没有真实云部署/平台调用/真机检查。后续完成图片链路时须同步提供明确标记的本地体验。详细协议与文件见 [内容安全记录](content-safety.md)。
+- 补充检查：`npm run format:check`、`npm run check:cloud`、`npm run db:init -- --dry-run`、`git diff --check` 均退出 0。六个既有云函数包独立加载及部署依赖审计通过；新增协调模块尚未被业务运行时引用，云包检查不代表该模块已接线。dry-run 列出 17 个集合，`cloudContacted=false`。本轮在 `codex/task-400-letters` 本地提交，不推送或部署。
+
+### TASK-400 / 401 / 601 图文接线与页面分层
+
+- 服务端新增 `letterApi/images.ts`：作者草稿绑定的图片准备/确认/取消、私有预览与过期清理；实际字节/MIME/大小校验、隔离上传和不可覆盖最终文件。票据内嵌受保护 letters 记录，作者 DTO 不返回内部票据。修改 `_shared/audio-storage.ts` 扩展受控 letter 路径，图片通道拒绝音频/WebP/SVG 和跨路径域封存；保持默认拒绝存储规则。
+- 新增 `_shared/letter-config.ts`，通过 `db.ts`、`letter-repository.ts` 接入默认→全局→学校覆盖的图片开关和数量；配置错误失败关闭。`letter-db.ts` 严格还原图片票据及聚合安全摘要。`handler.ts`、`runtime.ts`、`letterApi/letters.ts` 接通可信图片解析与异步协调器，最终事务复验作者、组织、版本、图片与配置，pending/unavailable 不入队。
+- 前端依照用户“不堆叠、有层次和艺术美”的要求拆为 `pages/letters/` 阅读入口、`pages/my-letters/` 本人列表、`pages/write-letter/` 信纸编辑器；`letters/controller.ts` 复用状态行为。纸张留白、墨色标题、暖金细节，正文/附件/范围分区，底部固定操作与错误反馈；明确 20 字提交门槛。`app.json` 当前 19 页。
+- 新增 `services/letter-image.service.ts`，实际选择、压缩、文件保存/限时 PUT、校验、预览与取消；`local-letters.ts`、`local-repository.ts` 独立保存本地图片引用与恢复。无云时图片确实保存本机，不伪造平台审核；未改稿件重试提交不递增 revision，避免异步检查不断失效。
+- 新测试：`tests/backend/letter-images.test.ts`、`tests/database/letter-config.test.ts`，补充 local-letters、storage 与 fixtures。覆盖作者/草稿归属、未确认/取消/重复图片、异步 pending、封存失败、配置禁用、清理保留引用、跨域路径、重开恢复。
+- Node `22.23.2`，2026-09-16 15:03 完整 `npm run verify` 通过 lint、三套 typecheck、**36 文件 / 480 项测试**与构建；`format:check`、`check:cloud`、`git diff --check` 通过。六个已包含新运行时接线的函数包独立加载及部署依赖审计通过，未调用真实云。
+- 15:04:45 模拟器 **10 项通过，异常 0**，包含实际压缩/本机保存、重开恢复图片、提交及撤回/删除；选择器使用包内图片夹具，原生确认框自动应答，`imagePickerMocked=true`、`confirmationMocked=true`、`cloudVerified=false`、`deviceVerified=false`。首次发现开发者工具保存文件返回 `http://store/`，原路径校验未兼容；修正后完整复验通过。验收前备份现有数据库与编辑缓存，结束恢复，不覆盖用户现有家书。
+- 尚待：真实 AppID/云上传/回调/事务/真机相册验收；按用户的上传速率限制、无人返回时的定时孤儿文件清理、本机保存文件的回收、客户端同步学校较低图片上限；TASK-403 完整筛选与详情、TASK-404 审核/精选等。暂不宣称 TASK-400/401/601 的上线验收全部完成。本轮无云部署、推送、PR 或合并。
+- 收尾复验：15:08 完整 verify、格式和云包检查通过；补充切换另一封家书前的未保存编辑确认提示后，再次通过 lint、三套 typecheck、480 项测试、格式检查及模拟器 10 项检查（异常 0）。切换草稿确认的取消分支尚未单独自动化验收。文档相对链接 103 项有效，`git diff --check` 通过；代码保留在当前本地开发分支。
+
+### TASK-400 图文家书合并前复核
+
+- 2026-09-16 按用户要求复核整个分支（文字投稿、图片安全协调、图文接线与页面分层）。发现独立列表删除家书后，编辑器缓存仍可能恢复已删除稿件；在 `services/letter-editor-cache.ts` 增加按稿件匹配清理，并接入 `pages/letters/controller.ts` 的成功删除路径。不会清除其他稿件、账号或模式的缓存。
+- `tests/client/local-letters.test.ts` 增加缓存隔离回归；`scripts/verify-local-experience.ts` 在列表删除前植入匹配编辑缓存并检查成功删除后清空。`npm run verify` 通过 **36 文件 / 481 项测试**、lint、三套 typecheck、构建；模拟器 **10 项通过，异常 0**，包含新增删除缓存回归。选图器为图片夹具、确认框自动应答；数据库与原编辑缓存已恢复。
+- `format:check`、`check:cloud`、数据库初始化 dry-run 和根/小程序生产依赖审计通过（均 0 vulnerabilities）；未执行真实云操作。无其他已发现的开发阶段合并阻断项；上节真实平台验证、限流与文件回收等上线前待办不因本次合并而关闭。
+- 用户进一步要求后续按页面性质寻找网络样式参考，分别设计按钮和内容呈现，避免统一矩形堆叠；已补充到 `docs/decisions.md`，本轮不扩大重设计范围。

@@ -10,6 +10,9 @@ import {
   queryPersonal,
   queryCleanup,
 } from './audio-db';
+import { parseLetterDocument, queryOwnLetters } from './letter-db';
+import type { LetterRecord } from './letter-repository';
+import { readLetterImageLimit } from './letter-config';
 import type {
   AudioQuery,
   PersonalAudioQuery,
@@ -163,6 +166,15 @@ function updated(result: unknown): void {
     throw new Error('Document update was not acknowledged');
 }
 class CloudTransactionRepository implements TransactionRepository {
+  letterImageLimit(schoolId: string) {
+    return readLetterImageLimit(this.transaction, schoolId);
+  }
+  findLetter(id: string) {
+    return getDocument(this.transaction, 'letters', id, parseLetterDocument);
+  }
+  saveLetter(value: LetterRecord, exists: boolean) {
+    return saveDocument(this.transaction, 'letters', value, exists);
+  }
   constructor(private readonly transaction: unknown) {}
   private collection(name: string): unknown {
     return call(this.transaction, 'collection', name);
@@ -243,6 +255,15 @@ class CloudTransactionRepository implements TransactionRepository {
 
 /** wx-server-sdk only at this adapter boundary; external documents start as unknown. */
 export class CloudRepository implements Repository {
+  letterImageLimit(schoolId: string) {
+    return readLetterImageLimit(this.database(), schoolId);
+  }
+  findLetter(id: string) {
+    return getDocument(this.database(), 'letters', id, parseLetterDocument);
+  }
+  listOwnLetters(authorId: string, after?: string) {
+    return queryOwnLetters(this.database(), authorId, after);
+  }
   constructor(private readonly database: () => CloudDatabasePort) {}
 
   findAudio(id: string) {

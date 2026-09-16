@@ -174,7 +174,7 @@ describe('无云本地体验与正式 DTO 共用', () => {
   it('本地存储写入失败不返回成功，也不把未完成家书接口冒充为成功', async () => {
     const f = fixture();
     await f.call('authApi', 'login', parseLoginResult);
-    await expect(f.call('letterApi', 'submit', (v) => v)).rejects.toMatchObject({
+    await expect(f.call('letterApi', 'listPublic', (v) => v)).rejects.toMatchObject({
       code: 'NOT_IMPLEMENTED',
     });
     f.port.write = () => {

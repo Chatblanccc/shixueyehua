@@ -1,0 +1,16 @@
+<view wx:if="{{isOnboarded}}" class="writing-page">
+  <view class="writing-heading"><text class="eyebrow">一封家书 · 慢慢写，不着急</text><text class="save-state">{{dirty ? '尚有编辑未保存' : letterId ? '草稿已保存' : '新的心意'}}</text></view>
+  <view class="writing-paper">
+    <input id="letter-title" class="writing-title" placeholder="给这封信一个名字" value="{{editor.title}}" maxlength="30" disabled="{{busy}}" bindinput="onTitle" />
+    <picker range="{{recipientNames}}" value="{{recipientIndex}}" disabled="{{busy}}" bindchange="onRecipient"><view class="writing-recipient">写给 {{recipientNames[recipientIndex]}} <text>⌄</text></view></picker>
+    <textarea id="letter-content" class="writing-content" placeholder="从一句想说的话开始……" value="{{editor.content}}" maxlength="3000" disabled="{{busy}}" auto-height bindinput="onContent" />
+    <text class="word-note">{{editor.content.length}} / 3000 字 · 提交至少 20 字，短文也可存草稿</text>
+  </view>
+  <view class="attachments-heading"><text>随信附上</text><text class="section-note">{{editor.imageFileIds.length}} / 3 张 · JPG / PNG</text></view>
+  <view class="attachments"><view wx:for="{{editor.imageFileIds}}" wx:key="*this" class="attachment"><image src="{{imageUrls[index]}}" mode="aspectFill" data-index="{{index}}" bindtap="onPreviewImage" /><button class="remove-image" size="mini" disabled="{{busy}}" data-index="{{index}}" bindtap="onRemoveImage">移除</button></view><button wx:if="{{editor.imageFileIds.length < 3}}" id="add-letter-image" class="add-attachment" disabled="{{busy}}" bindtap="onAddImage"><text>＋</text><text>添加照片</text></button></view>
+  <view class="delivery"><text>展示范围</text><picker range="{{scopeNames}}" value="{{scopeIndex}}" disabled="{{busy}}" bindchange="onScope"><text>{{scopeNames[scopeIndex]}} ⌄</text></picker></view>
+  <text class="privacy-note">请勿填写联系方式或外部链接。公开展示须经管理员审核。</text>
+  <text wx:if="{{localExperience}}" class="local-note">本地体验：图片与家书只保存在本机，非微信内容审核。</text>
+  <view class="writing-actions"><text wx:if="{{letterError}}" id="letter-error" class="form-error">{{letterError}}</text><text wx:if="{{imagePhase}}" class="section-note">{{imagePhase}}…</text><view class="action-row"><button id="save-letter" disabled="{{busy}}" bindtap="onSave">保存草稿</button><button id="submit-letter" class="submit-letter" loading="{{busy}}" disabled="{{busy}}" bindtap="onSubmit">提交审核</button></view></view>
+</view>
+<view wx:else class="gate"><t-loading theme="circular" text="正在准备信纸…" /></view>

@@ -72,7 +72,7 @@ export function parseSafetyJob(value: unknown): MediaSafetyJob & { _id: string }
   } else if (value.callbackHash !== undefined) throw new Error('Incomplete safety receipt');
   return job;
 }
-function parseDraft(value: unknown): SafetyDraftSnapshot & { _id: string } {
+export function parseSafetyDraft(value: unknown): SafetyDraftSnapshot & { _id: string } {
   if (!isRecord(value) || !Array.isArray(value.imageFileIds) || value.imageFileIds.length > 3)
     throw new Error('Invalid safety draft');
   return {
@@ -136,7 +136,7 @@ export class CloudSafetyJobStore implements SafetyJobStore {
       const value = await work({
         findJob: (appId, traceId) =>
           getDocument(tx, 'media_safety_jobs', safetyJobId(appId, traceId), parseSafetyJob),
-        findDraft: (id) => getDocument(tx, 'letters', id, parseDraft),
+        findDraft: (id) => getDocument(tx, 'letters', id, parseSafetyDraft),
         saveJob: async (job) => {
           const document = parseSafetyJob({ ...job, _id: safetyJobId(job.appId, job.traceId) });
           await saveDocument(tx, 'media_safety_jobs', document, true);

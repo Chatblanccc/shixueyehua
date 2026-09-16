@@ -1,31 +1,10 @@
-<view wx:if="{{isOnboarded || previewMode}}" class="page">
-  <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
-  <view wx:elif="{{currentClass}}" class="preview-tag">{{currentClass.school.name}} · {{currentClass.class.name}}</view>
-  <view wx:elif="{{classError}}" class="preview-tag">{{classError}}</view>
-  <text class="eyebrow">落笔，是另一种拥抱</text>
-  <text class="page-title">一封家书</text>
-  <text class="page-description">写下平日没说出口的话，寄给重要的人。</text>
-
-  <view class="letter-invitation">
-    <view class="letter-corner" aria-hidden="true"></view>
-    <view class="letter-stamp" aria-hidden="true"><t-icon name="mail" size="44rpx" /></view>
-    <text class="letter-salutation">亲爱的家人：</text>
-    <text class="letter-thought">关于成长，关于感谢，<text class="block-line">关于我们一起走过的日子。</text></text>
-    <view class="letter-lines" aria-hidden="true"><view></view><view></view></view>
-    <text class="letter-signature">把心意，写进一封信里。</text>
-  </view>
-  <view class="compose-button">
-    <t-button theme="primary" size="large" block disabled>写家书 · 即将开放</t-button>
-  </view>
-
-  <view class="section-heading">
-    <text class="section-title">精选家书</text>
-    <text class="section-note">每一封都被认真阅读</text>
-  </view>
-  <view class="card">
-    <empty-state icon="mail" title="等待第一封温暖的来信" description="家书投稿与精选展示即将开放。每封投稿经学校审核后，才会在这里与大家见面。" />
-  </view>
-  <mini-player />
-  <view class="page-footnote">真诚落笔 · 温柔抵达</view>
+<view class="letters-home">
+  <view class="home-top"><text class="eyebrow">LETTERS · 家与远方</text><text class="mine-entry" bindtap="onMine">我的家书 ↗</text></view>
+  <text class="home-title">有些心意，<text class="block-line">值得落笔。</text></text>
+  <text class="home-subtitle">把平日没说出口的话，<text class="block-line">留给最重要的人。</text></text>
+  <view class="letter-invitation"><view class="letter-stamp">信</view><text class="letter-salutation">亲爱的家人：</text><text class="letter-thought">关于成长，关于感谢，<text class="block-line">关于我们一起走过的日子。</text></text><view class="letter-lines"><view></view><view></view></view><text class="letter-signature">真诚落笔 · 温柔抵达</text></view>
+  <button id="new-letter" class="write-entry" bindtap="onWrite">写一封家书 <text>＋</text></button>
+  <view class="showcase-heading"><text>纸短情长</text><text class="section-note">精选来信</text></view>
+  <view class="showcase-empty"><text>等待第一封温暖的来信</text><text class="section-note">审核与精选功能建设中，投稿不会直接公开。</text></view>
 </view>
-<view wx:else class="gate"><t-loading theme="circular" text="正在连接校园…" /></view>
+<mini-player />

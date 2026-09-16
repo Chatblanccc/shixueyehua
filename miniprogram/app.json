@@ -5,6 +5,8 @@
     "pages/class-select/index",
     "pages/night-talk/index",
     "pages/letters/index",
+    "pages/write-letter/index",
+    "pages/my-letters/index",
     "pages/class/index",
     "pages/profile/index",
     "pages/audio-detail/index",
