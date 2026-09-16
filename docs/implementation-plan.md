@@ -181,3 +181,12 @@ flowchart LR
 - 2026-09-16 12:59（北京时间），Node `22.23.2` 下 `npm run verify` 通过 lint、三套严格类型检查、**33 文件 / 439 项测试**和构建；格式检查通过。微信开发者工具首次新流程验收 9 项通过，异常 0，覆盖实际音频播放和文字家书输入、保存、待审、撤回、软删除。原生确认框自动应答，测试后恢复数据库及编辑缓存；随后截图复核修正标题输入框裁切并复验。
 - TASK-400 仍部分完成：非空图片列表失败关闭，图片数量配置/上传归属/异步检查接入待 TASK-401/601；审核、精选公开、举报另属后续 TASK。未调用真实 CloudBase、微信文本/图片安全或手机，未声称上线验收通过。本分支尚未推送或合并。
 - 最终复验：13:02:54 完整 `npm run verify` 通过 **33 文件 / 440 项测试**（补充提交时采用用户最新可信班级的用例），lint、三套 typecheck、构建均通过。13:02:59 模拟器 9 项再次通过，异常 0，截图确认标题不再裁切；报告 `artifacts/local-experience/verification.json` 明确 `confirmationMocked=true`、`cloudVerified=false`、`deviceVerified=false`。`format:check`、`check:cloud`、数据库初始化 dry-run（包含新增索引，未连接云）及 `git diff --check` 通过。
+
+### TASK-400 / 600 图片提交前置：异步检查协调
+
+- 新增 `cloudfunctions/_shared/safety-submission.ts`、`safety-submission-db.ts`：服务端确定性任务键、并发租约、任务/回执原子登记、读取已验证回调、版本复验与超时恢复。不会修改或发布家书；相同版本的拒绝结果不通过重复请求绕开。
+- 修改 `safety-jobs-db.ts` 复用严格草稿解析；`scripts/database/manifest.ts` 新增默认拒绝集合 `media_safety_submissions` 与过期索引；更新 `tests/database/database.test.ts` 至 17 个集合。新增 `tests/backend/safety-submission.test.ts` 的 24 项回归。
+- 2026-09-16 13:26（北京时间），Node 22 下 `npm run verify` 通过 lint、三套严格类型检查、**34 文件 / 464 项测试**与构建。测试首次发现参数化数组用例的 TypeScript 写法错误，修正后完整重跑通过。
+- 当前交付仅为图片安全协调模块，尚未接入运行时 submit。图片真实上传/归属解析、配置上限、提交事务最终复验、服务与页面接线和无云图片体验仍待实现；用户图片入口继续关闭，文字家书不受影响。不能据此将 TASK-400 或 TASK-600 标记完成。
+- 没有页面或本地业务改动，不重跑微信模拟器、不把上一轮 9 项结果当作图片验收；没有真实云部署/平台调用/真机检查。后续完成图片链路时须同步提供明确标记的本地体验。详细协议与文件见 [内容安全记录](content-safety.md)。
+- 补充检查：`npm run format:check`、`npm run check:cloud`、`npm run db:init -- --dry-run`、`git diff --check` 均退出 0。六个既有云函数包独立加载及部署依赖审计通过；新增协调模块尚未被业务运行时引用，云包检查不代表该模块已接线。dry-run 列出 17 个集合，`cloudContacted=false`。本轮在 `codex/task-400-letters` 本地提交，不推送或部署。

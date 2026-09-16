@@ -22,6 +22,7 @@ function index(name: string, fields: readonly string[], unique = false): IndexDe
 
 /** TASK-102; existing indexes are compared, never automatically dropped. */
 export const DATABASE_MANIFEST: ReadonlyArray<CollectionDefinition> = [
+  { name: 'media_safety_submissions', indexes: [index('expires', ['expiresAt'])] },
   {
     name: 'media_safety_jobs',
     indexes: [
