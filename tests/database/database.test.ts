@@ -115,8 +115,8 @@ class MemoryManagement implements ManagementPort {
 }
 
 describe('TASK-102 manifest and initialization', () => {
-  it('defines 15 distinct collections and required uniqueness constraints', () => {
-    expect(new Set(DATABASE_MANIFEST.map((collection) => collection.name)).size).toBe(15);
+  it('defines 16 distinct collections and required uniqueness constraints', () => {
+    expect(new Set(DATABASE_MANIFEST.map((collection) => collection.name)).size).toBe(16);
     for (const [collection, fields] of [
       ['users', ['openid']],
       ['favorites', ['userId', 'audioId']],

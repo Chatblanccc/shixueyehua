@@ -1,6 +1,7 @@
 import { copyFile, cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { build } from 'esbuild';
 import { isRecord } from '../shared';
+import { cloudPermissions } from './cloud-permissions';
 
 const functions = ['authApi', 'classApi', 'audioApi', 'letterApi', 'adminAudioApi', 'adminApi'];
 const rootPackage: unknown = JSON.parse(await readFile('package.json', 'utf8'));
@@ -68,7 +69,7 @@ for (const name of functions) {
   await cp('config/cloud-runtime/vendor', `${directory}/vendor`, { recursive: true });
   await writeFile(
     `${directory}/config.json`,
-    JSON.stringify({ permissions: { openapi: [] } }, null, 2) + '\n',
+    JSON.stringify({ permissions: { openapi: cloudPermissions(name) } }, null, 2) + '\n',
   );
 }
 console.log(

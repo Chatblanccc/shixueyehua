@@ -124,6 +124,14 @@ npm run verify:stage1
 
 ## 7. 后续顺序与剩余边界
 
+### 2026-09-16 家书前置推进：TASK-600（部分完成）
+
+- 已实现文本分段检查、图片异步受理、超时与失败默认阻止、严格结果解析、作者反馈脱敏、仅无云开发可用的演示反馈；正式家书接口尚未开放。
+- 主要文件：`cloudfunctions/_shared/content-safety.ts`、`wechat-content-safety.ts`、`runtime.ts`、`handler.ts`；`shared/content-safety.ts`、`errors.ts`、`index.ts`；`miniprogram/services/local-content-safety.ts`；`scripts/cloud-permissions.ts`、`build-cloud.ts`、`check-cloud-packages.ts`；两份 content-safety 测试。详见 [内容安全说明](content-safety.md)。
+- 待完成：图片实际归属解析器、可信微信异步回调及版本绑定、TASK-400/401 业务和本地页面接入；真实平台验收仍延期。故障不会回退成本地成功。本轮没有新增投稿页面或声称图片已审核通过。
+- 阶段 3 已经 PR #3 合并 main（`0fa6534`），本轮从干净 main 创建 `codex/stage-4-content-safety` 开发。
+- 验证：2026-09-16 12:19（北京时间），`npm run verify` 通过 lint、三套 typecheck、28 文件 / **369 项测试**及构建；新增 44 项测试。`npm run format:check`、`git diff --check` 通过。12:18 的 `npm run check:cloud` 已验证本轮构建/权限清单及六包独立加载和生产依赖审计，此后只新增测试与文档。未运行微信模拟器、真实云或真机；本轮没有页面改动。
+
 | 阶段               | TASK                         | 当前状态 / 依赖                                                    |
 | ------------------ | ---------------------------- | ------------------------------------------------------------------ |
 | 云端补验           | 003、101、102、103           | 等待可用真实 AppID 和 dev 环境；按数据库、规则、登录与授权顺序补验 |
@@ -132,7 +140,8 @@ npm run verify:stage1
 | 3 夜话音频         | 304、305                     | 页面与本地业务体验已实现；真实文件选择、上传、云存储/事务待验      |
 | 4 一封家书         | 400、401、402、403、404、405 | 尚未实现；只有家书空态页面                                         |
 | 5 管理中心         | 500、501、502、503、504      | 尚未实现；只有分包占位与权限入口守卫                               |
-| 6 安全、体验与发布 | 600、601、602、603、604      | 尚未验收；初始数据库 / 存储拒绝规则代码已随 102 交付               |
+| 6 内容安全前置     | 600                         | 适配层、加密回调与事务绑定本地通过；上传归属/投稿接入和真实平台待验 |
+| 6 安全、体验与发布 | 601、602、603、604           | 尚未验收；初始数据库 / 存储拒绝规则代码已随 102 交付               |
 
 ```mermaid
 flowchart LR
@@ -153,3 +162,12 @@ flowchart LR
 - P1 保留在 V0.1 范围；公开家书上线前必须完成举报处置。
 
 真实云就绪后按[开发指引](DEVELOPMENT.md)、[数据库指引](database.md)、[安全规则](security-rules.md)、[云函数接口](cloud-functions.md)和[独立复核待验清单](acceptance-review.md)补验。每个 TASK 继续记录修改文件、检查结果、环境与未验证边界；不记录密钥或真实用户内容。
+
+### TASK-600 第二次推进：加密回调与事务绑定
+
+- 新增 `cloudfunctions/_shared/safety-callback.ts`、`safety-jobs.ts`、`safety-jobs-db.ts`、`safety-http.ts`；修改 `letterApi/index.ts`、`runtime.ts` 与 `scripts/database/manifest.ts`，新增默认拒绝的 `media_safety_jobs` 集合和索引清单。
+- 实现签名验证、AES 解密与 AppID 绑定；任务原子登记与匹配草稿版本的结果保存；重复幂等、冲突拒绝、迟到失效；回调不能发布家书，凭据缺失时关闭入口。
+- 新增 `tests/backend/safety-callback.test.ts`、`tests/database/safety-jobs-db.test.ts` 并更新集合数量测试。2026-09-16 12:37（北京时间）`npm run verify` 通过 lint、三个 typecheck、**30 文件 / 413 项测试**与构建；`format:check`、`check:cloud` 通过，六包独立加载及生产依赖审计通过。未触达真实云或手机，未新增页面，因此不重复模拟器验收。
+- TASK-600 仍部分完成：缺图片真实上传归属解析器、提交端任务登记/恢复接入、真实平台回调验收。下一项 TASK-400 开始家书草稿与文本提交闭环，TASK-401/601 同步补图片上传。未经归属与检查确认的图片不会被开放。
+- 完整协议、环境变量、HTTP 映射假设、文件清单及限制见 [内容安全记录](content-safety.md)。本轮未推送、创建 PR、合并或部署。
+- `npm run db:init -- --dry-run` 退出 0：16 个集合清单包含新增任务集合及三个索引，`cloudContacted=false`；`git diff --check` 通过。
