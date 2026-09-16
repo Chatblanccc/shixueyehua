@@ -12,9 +12,9 @@
   </view>
   <view class="connection-section">
     <view wx:if="{{previewMode}}" class="preview-introduction">
-      <text class="error-message">当前为页面预览，登录与内容服务暂未启用。</text>
+      <text class="error-message">无需连接云服务，即可体验示例校园、收听夜话与管理发布。体验数据仅保存在本机。</text>
       <view class="retry-button">
-        <t-button id="preview-entry" theme="primary" size="large" block bind:tap="onPreview">进入页面预览</t-button>
+        <t-button id="preview-entry" theme="primary" size="large" block bind:tap="onPreview">进入本地完整体验</t-button>
       </view>
     </view>
     <view wx:elif="{{loading}}" class="loading-wrap">

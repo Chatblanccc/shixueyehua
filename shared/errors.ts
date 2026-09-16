@@ -8,6 +8,8 @@ export const ERROR_MESSAGES = {
   SCHOOL_SCOPE_DENIED: '无法访问其他学校的数据',
   SCHOOL_NOT_AVAILABLE: '该学校当前不可使用',
   CLASS_NOT_AVAILABLE: '该班级当前不可选择',
+  AUDIO_STATE_CONFLICT: '这期夜话的状态已变化，请刷新后重试',
+  UPLOAD_EXPIRED: '上传凭证已过期，请重新选择文件',
   AUDIO_NOT_FOUND: '这期夜话已下架或不存在',
   UPLOAD_FAILED: '上传失败，请重试',
   CONTENT_REJECTED: '内容暂时无法提交，请修改后重试',

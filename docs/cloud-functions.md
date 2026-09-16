@@ -1,6 +1,6 @@
 # 云函数接口与部署包
 
-更新：2026-09-15。对应阶段 1 与 TASK-200～202。资料更新、三级目录、事务选班和页面守卫已实现；本文描述本地代码与验证结果，尚未部署云函数或使用真实微信身份联调。用户已明确正式 AppID 与关联云环境后补。
+更新：2026-09-16。对应阶段 1、TASK-200～202 与音频用户侧 TASK-300～303。资料更新、三级目录、事务选班、音频读取/进度/收藏和播放器已实现；本文描述本地代码与验证结果，尚未部署云函数或使用真实微信身份联调。用户已明确正式 AppID 与关联云环境后补。
 
 相关入口：[开发指引](DEVELOPMENT.md) · [数据库初始化](database.md) · [安全规则](security-rules.md) · [依赖审计](dependency-audit.md) · [实施计划](implementation-plan.md)。
 
@@ -12,9 +12,9 @@
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | `authApi`       | `login`、`getProfile`、`health`、`updateProfile`、`requestDelete`                                                                                                                   | `login/getProfile/health/updateProfile` 已实现；`requestDelete` 仍返回 `NOT_IMPLEMENTED`    |
 | `classApi`      | `listSchools`、`listGrades`、`listClasses`、`selectClass`、`getCurrentClass`                                                                                                        | 五个 action 已实现，目录按活跃状态和父级过滤，选班为事务写入                                |
-| `audioApi`      | `list`、`detail`、`saveProgress`、`history`、`toggleFavorite`、`listFavorites`                                                                                                      | 完成基础登录 / 状态守卫后返回 `NOT_IMPLEMENTED`                                             |
+| `audioApi`      | `list`、`detail`、`saveProgress`、`history`、`toggleFavorite`、`listFavorites`                                                                                                      | 已实现可信范围内的已发布内容、短期媒体 URL、进度、历史和幂等收藏；真实云/存储待验           |
 | `letterApi`     | `createDraft`、`updateDraft`、`submit`、`listPublic`、`detail`、`listMine`、`withdraw`、`delete`、`report`                                                                          | 完成基础登录 / 状态守卫后返回 `NOT_IMPLEMENTED`                                             |
-| `adminAudioApi` | `createDraft`、`updateDraft`、`publish`、`offline`、`delete`、`listManage`                                                                                                          | 先验证服务端管理员、账号状态和授权学校；通过后返回 `NOT_IMPLEMENTED`                        |
+| `adminAudioApi` | `prepareUpload`、`confirmUpload`、`cancelUpload`、`cleanupUploads`、`createDraft`、`updateDraft`、`publish`、`offline`、`delete`、`listManage`、`detail`                            | 服务端与管理页面已接线；本地体验通过，真实云存储待验                                        |
 | `adminApi`      | `listPendingLetters`、`reviewLetter`、`listReports`、`handleReport`、`createGrade`、`createClass`、`updateClass`、`grantAdmin`、`revokeAdmin`、`getConfig`、`setConfig`、`listLogs` | 先验证服务端管理员；`grantAdmin` / `revokeAdmin` 额外要求超管；通过后返回 `NOT_IMPLEMENTED` |
 
 权限检查不通过时返回对应权限错误，不会返回 `NOT_IMPLEMENTED`。未知 action 返回 `INVALID_ARGUMENT`，没有客户端 bootstrap 接口。尚未实现的接口不会返回空列表或模拟写入成功，也不会更改业务记录。
@@ -158,14 +158,16 @@ interface HealthResult {
 - 超级管理员可以跨校，但提供目标学校时仍须检查其存在和状态。
 - 角色撤销后，下一次管理请求重新读取并拒绝；不存在跨请求的服务端角色缓存。
 
-当前未开放真实资源管理。后续实现音频、家书或班级写入时，必须加载资源并根据数据库中真实的资源学校复核权限，不能只检查请求附带的 `schoolId`。数据库和存储初始默认拒绝规则见[安全规则](security-rules.md)。
+音频读取和管理员音频服务端动作均依据数据库资源学校复核权限，不能只检查请求附带的 `schoolId`；家书及其余管理写入仍待实现时也必须遵循同一规则。数据库和存储初始默认拒绝规则见[安全规则](security-rules.md)。
 
 [audit.ts](../cloudfunctions/_shared/audit.ts) 区分两类记录：
 
 - 控制台请求日志仅有函数领域、已解析动作、服务端 requestId、结果和错误码；不输出 payload、OpenID、SDK 异常原文或堆栈。
 - 管理审计写入受保护的 `admin_logs`，保留可信操作者、目标和请求 ID；`before/after` 仅接收有限状态字段，去掉正文、联系方式、文件 URL、令牌与任意嵌套数据。操作者 OpenID 仅用于受保护审计，不返回客户端；审计写入必须收到有效的新增 ID 回执。后续真实管理状态变化必须与审计可靠地一起提交。首次超管脚本另使用事务，验证角色更新和永久审计的写入回执，详见[数据库说明](database.md)。
 
-[pagination.ts](../cloudfunctions/_shared/pagination.ts) 提供 HMAC 签名游标，绑定稳定排序位置和服务端派生的查询范围，拒绝篡改、跨范围重用与非法页大小。默认每页 20 条，范围 1～20；签名密钥须由服务端注入，至少 32 字节，不设真实默认值。当前未开放业务分页 action，不能把工具单测视为音频或家书分页已实现。
+[pagination.ts](../cloudfunctions/_shared/pagination.ts) 提供备用的 HMAC 签名游标工具，签名密钥须由服务端注入，至少 32 字节，不设真实默认值；当前音频接口未使用该工具。
+
+音频列表、历史、收藏和管理列表使用 [audio-common.ts](../cloudfunctions/_shared/audio-common.ts) 的范围绑定游标，默认每页 20 条，上限 100 条。游标为未签名的 base64url 数据，服务端校验结构、排序位置、快照和查询范围，但不将其视作授权凭证；每次请求均重新根据可信用户与资源检查访问权限。家书分页仍未实现。
 
 ## 6. 主要错误
 

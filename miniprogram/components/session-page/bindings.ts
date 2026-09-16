@@ -19,6 +19,7 @@ export function bindUserStore(target: BindingTarget): void {
       'onboardingStep',
       'errorMessage',
       'previewMode',
+      'localExperience',
       'currentClass',
       'classLoading',
       'classError',

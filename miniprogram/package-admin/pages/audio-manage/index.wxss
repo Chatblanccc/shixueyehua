@@ -1,3 +1,32 @@
-.admin-placeholder {
-  margin-top: 42rpx;
+.filters,
+.actions {
+  display: flex;
+  gap: 12rpx;
+  margin: 24rpx 0;
+  flex-wrap: wrap;
+}
+.filters button,
+.actions button {
+  margin: 0;
+  width: auto;
+  padding: 0 24rpx;
+  font-size: 26rpx;
+}
+.filters .selected {
+  background: #213c49;
+  color: #fff;
+}
+.audio-manage-item {
+  margin: 24rpx 0;
+  padding: 28rpx;
+}
+.section-title,
+.caption {
+  display: block;
+  margin-bottom: 16rpx;
+  overflow-wrap: anywhere;
+}
+t-button {
+  display: block;
+  margin-top: 20rpx;
 }

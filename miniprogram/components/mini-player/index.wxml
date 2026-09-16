@@ -1,0 +1,20 @@
+<view wx:if="{{playerState.visible}}" class="mini-player {{compact ? 'mini-player--compact' : ''}}">
+  <view class="mini-player__row">
+    <view class="mini-player__summary" bind:tap="onOpen" role="button" aria-label="查看正在收听的夜话">
+      <image wx:if="{{playerState.coverUrl}}" class="mini-player__cover" src="{{playerState.coverUrl}}" mode="aspectFill" />
+      <view wx:else class="mini-player__cover mini-player__cover--fallback">夜</view>
+      <view class="mini-player__copy">
+        <text class="mini-player__eyebrow">{{playerState.status === 'playing' ? '正在收听' : playerState.status === 'loading' ? '正在加载' : playerState.status === 'ended' ? '本期已听完' : playerState.status === 'error' ? '暂时无法播放' : '已暂停'}}</text>
+        <text class="mini-player__title">{{playerState.title || '正在读取夜话'}}</text>
+        <text class="mini-player__time">{{playerState.currentTimeLabel}} / {{playerState.durationLabel}}</text>
+      </view>
+    </view>
+    <t-button wx:if="{{!compact}}" id="mini-player-toggle" theme="primary" size="small" shape="round" custom-style="flex:none;min-width:112rpx;" bind:tap="onToggle">{{playerState.status === 'playing' || playerState.status === 'loading' ? '暂停' : playerState.status === 'error' ? '重试' : playerState.status === 'ended' ? '重听' : '继续'}}</t-button>
+  </view>
+  <view class="mini-player__progress"><view class="mini-player__progress-fill" style="width:{{playerState.progressPercent}}%;" /></view>
+  <text wx:if="{{playerState.errorMessage}}" class="mini-player__notice">{{playerState.errorMessage}}</text>
+  <view wx:if="{{playerState.syncError}}" class="mini-player__sync">
+    <text>{{playerState.syncError}}</text>
+    <text class="mini-player__retry" bind:tap="onRetrySync" role="button">重试同步</text>
+  </view>
+</view>

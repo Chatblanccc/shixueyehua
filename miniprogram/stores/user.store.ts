@@ -1,6 +1,7 @@
 import { observable } from 'mobx-miniprogram';
 import type { CurrentClass, ErrorCode, OnboardingStep, UserProfile } from '../generated/shared';
 import { environment } from '../config/env';
+import { localModeEnabled } from '../services/local-mode';
 
 export function createUserStore(previewMode = false) {
   return observable({
@@ -10,6 +11,7 @@ export function createUserStore(previewMode = false) {
     errorCode: '' as ErrorCode | '',
     onboardingStep: 'identity' as OnboardingStep,
     previewMode,
+    localExperience: false,
     currentClass: null as CurrentClass | null,
     classLoading: false,
     classError: '',
@@ -30,4 +32,5 @@ export function createUserStore(previewMode = false) {
 }
 
 export type UserStore = ReturnType<typeof createUserStore>;
-export const userStore = createUserStore(environment.previewMode);
+export const userStore = createUserStore(environment.previewMode && !localModeEnabled());
+userStore.localExperience = localModeEnabled();

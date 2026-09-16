@@ -25,6 +25,7 @@
   <view class="card">
     <empty-state icon="mail" title="等待第一封温暖的来信" description="家书投稿与精选展示即将开放。每封投稿经学校审核后，才会在这里与大家见面。" />
   </view>
+  <mini-player />
   <view class="page-footnote">真诚落笔 · 温柔抵达</view>
 </view>
 <view wx:else class="gate"><t-loading theme="circular" text="正在连接校园…" /></view>

@@ -1,3 +1,17 @@
+import { listAudio, audioDetail, saveAudioProgress, setFavorite } from '../audioApi/audio';
+import {
+  prepareUpload,
+  confirmUpload,
+  cancelUpload,
+  cleanupUploads,
+  createDraft,
+  updateDraft,
+  transitionAudio,
+  listManage,
+  manageDetail,
+} from '../adminAudioApi/audio';
+import type { AudioUploadLimits } from '../adminAudioApi/audio';
+import type { AudioStoragePort } from './audio-storage-port';
 import { randomUUID } from 'node:crypto';
 import { isRecord } from '../../shared';
 import type { ApiResult } from '../../shared';
@@ -38,7 +52,19 @@ export const DOMAIN_ACTIONS = {
     'delete',
     'report',
   ],
-  adminAudioApi: ['createDraft', 'updateDraft', 'publish', 'offline', 'delete', 'listManage'],
+  adminAudioApi: [
+    'prepareUpload',
+    'confirmUpload',
+    'cancelUpload',
+    'cleanupUploads',
+    'createDraft',
+    'updateDraft',
+    'publish',
+    'offline',
+    'delete',
+    'listManage',
+    'detail',
+  ],
   adminApi: [
     'listPendingLetters',
     'reviewLetter',
@@ -62,6 +88,8 @@ export interface HandlerDependencies {
   getEnvironment: () => string | undefined;
   logger: Logger;
   now?: () => Date;
+  audioStorage?: AudioStoragePort;
+  audioUploadLimits?: AudioUploadLimits;
 }
 
 const ACTIVE_USER_ACTIONS = new Set([
@@ -142,8 +170,113 @@ export function createHandler(domain: Domain, dependencies: HandlerDependencies)
               now,
               requestId,
             );
+        } else if (domain === 'audioApi') {
+          if (action === 'list' || action === 'history' || action === 'listFavorites')
+            data = await listAudio(
+              dependencies.repository,
+              dependencies.audioStorage,
+              openid,
+              parsed.payload,
+              now,
+              action,
+            );
+          else if (action === 'detail')
+            data = await audioDetail(
+              dependencies.repository,
+              dependencies.audioStorage,
+              openid,
+              parsed.payload,
+              now,
+            );
+          else if (action === 'saveProgress')
+            data = await saveAudioProgress(dependencies.repository, openid, parsed.payload, now);
+          else data = await setFavorite(dependencies.repository, openid, parsed.payload, now);
+        } else if (domain === 'adminAudioApi') {
+          const actor = await requireAdmin(
+            dependencies.repository,
+            openid,
+            parsed.payload.schoolId === undefined ? undefined : identifier(parsed.payload.schoolId),
+          );
+          if (action === 'prepareUpload')
+            data = await prepareUpload(
+              dependencies.repository,
+              dependencies.audioStorage,
+              actor,
+              parsed.payload,
+              now,
+              requestId,
+              dependencies.audioUploadLimits,
+            );
+          else if (action === 'confirmUpload')
+            data = await confirmUpload(
+              dependencies.repository,
+              dependencies.audioStorage,
+              actor,
+              parsed.payload,
+              now,
+              requestId,
+            );
+          else if (action === 'cancelUpload')
+            data = await cancelUpload(
+              dependencies.repository,
+              actor,
+              parsed.payload,
+              now,
+              requestId,
+            );
+          else if (action === 'cleanupUploads')
+            data = await cleanupUploads(
+              dependencies.repository,
+              dependencies.audioStorage,
+              actor,
+              parsed.payload,
+              now,
+              requestId,
+            );
+          else if (action === 'createDraft')
+            data = await createDraft(
+              dependencies.repository,
+              actor,
+              parsed.payload,
+              now,
+              requestId,
+            );
+          else if (action === 'updateDraft')
+            data = await updateDraft(
+              dependencies.repository,
+              actor,
+              parsed.payload,
+              now,
+              requestId,
+            );
+          else if (action === 'listManage')
+            data = await listManage(
+              dependencies.repository,
+              dependencies.audioStorage,
+              actor,
+              parsed.payload,
+              now,
+            );
+          else if (action === 'detail')
+            data = await manageDetail(
+              dependencies.repository,
+              dependencies.audioStorage,
+              actor,
+              parsed.payload,
+              now,
+            );
+          else if (action === 'publish' || action === 'offline' || action === 'delete')
+            data = await transitionAudio(
+              dependencies.repository,
+              actor,
+              parsed.payload,
+              action,
+              now,
+              requestId,
+            );
+          else throw new AppError('INVALID_ARGUMENT');
         } else {
-          if (domain === 'adminApi' || domain === 'adminAudioApi') {
+          if (domain === 'adminApi') {
             // A submitted school is a target to validate, never the source of authority.
             const schoolId =
               parsed.payload.schoolId === undefined

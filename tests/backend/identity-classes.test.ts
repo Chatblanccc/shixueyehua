@@ -499,7 +499,7 @@ describe('TASK-202 trusted administration after onboarding', () => {
     });
     expect(
       await call('adminAudioApi', 'listManage', { schoolId: selection.schoolId }),
-    ).toMatchObject({ success: false, error: { code: 'NOT_IMPLEMENTED' } });
+    ).toMatchObject({ success: true, data: { items: [] } });
     repository.users.set('test_user', user({ identity: 'teacher', role: 'user' }));
     expect(
       await call('adminApi', 'getConfig', { schoolId: selection.schoolId, role: 'admin' }),

@@ -1,0 +1,94 @@
+:host {
+  display: block;
+}
+.mini-player {
+  margin: 28rpx 0 20rpx;
+  padding: 24rpx;
+  border: 1rpx solid #e2dfd2;
+  border-radius: 28rpx;
+  background: #fffdf6;
+  box-shadow: 0 10rpx 32rpx rgba(37, 54, 38, 0.06);
+}
+.mini-player__row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.mini-player__summary {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.mini-player__cover {
+  width: 90rpx;
+  height: 90rpx;
+  border-radius: 18rpx;
+  flex: none;
+}
+.mini-player__cover--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #faf5e8;
+  background: #435b47;
+  font-family: serif;
+  font-size: 36rpx;
+}
+.mini-player__copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5rpx;
+}
+.mini-player__eyebrow {
+  color: #6f806d;
+  font-size: 20rpx;
+}
+.mini-player__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #293d2f;
+  font-size: 27rpx;
+  font-weight: 600;
+}
+.mini-player__time {
+  color: #8c9084;
+  font-size: 21rpx;
+}
+.mini-player__progress {
+  height: 4rpx;
+  margin-top: 20rpx;
+  border-radius: 4rpx;
+  overflow: hidden;
+  background: #e9eadf;
+}
+.mini-player__progress-fill {
+  height: 100%;
+  background: #6f8768;
+}
+.mini-player__notice {
+  display: block;
+  margin-top: 14rpx;
+  color: #a2533f;
+  font-size: 23rpx;
+  line-height: 1.6;
+}
+.mini-player__sync {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 12rpx;
+  color: #7c796b;
+  font-size: 21rpx;
+  line-height: 1.6;
+}
+.mini-player__retry {
+  color: #3f6745;
+  text-decoration: underline;
+}
+.mini-player--compact {
+  box-shadow: none;
+}

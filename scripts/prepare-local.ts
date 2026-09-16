@@ -33,5 +33,5 @@ await writeIfChanged(
 );
 await buildShared();
 console.log(
-  `本地构建配置：${environment}，${envId ? '已配置云环境' : '仅页面预览，未启用云调用'}。`,
+  `本地构建配置：${environment}，${envId ? '已配置云环境' : '可在启动页进入本地体验，未启用云调用'}。`,
 );

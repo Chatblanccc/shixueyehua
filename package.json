@@ -26,20 +26,25 @@
     "db:bootstrap-admin": "tsx scripts/bootstrap-super-admin.ts",
     "devtools:build-npm": "tsx scripts/devtools.ts build-npm",
     "devtools:open": "tsx scripts/devtools.ts open",
-    "devtools:verify": "tsx scripts/verify-devtools.ts",
+    "devtools:verify": "tsx scripts/verify-local-experience.ts",
     "verify:stage1": "npm run verify && npm run format:check && npm run check:cloud && npm run db:init -- --dry-run && npm run db:bootstrap-admin -- --dry-run && npm audit --omit=dev && npm --prefix miniprogram audit --omit=dev && npm run devtools:verify",
-    "devtools:verify:stage2": "tsx scripts/verify-devtools.ts --stage2",
+    "devtools:verify:stage2": "tsx scripts/verify-local-experience.ts",
+    "devtools:verify:legacy": "tsx scripts/verify-devtools.ts --stage2",
+    "devtools:verify:local": "tsx scripts/verify-local-experience.ts",
     "verify:stage2": "npm run verify && npm run format:check && npm run check:cloud && npm run db:init -- --dry-run && npm run db:bootstrap-admin -- --dry-run && npm audit --omit=dev && npm --prefix miniprogram audit --omit=dev && npm run devtools:verify:stage2"
   },
   "dependencies": {
-    "wx-server-sdk": "4.0.2",
-    "lodash.set": "file:config/cloud-runtime/vendor/shixue-lodash-set-safe-1.0.1.tgz"
+    "@cloudbase/node-sdk": "3.18.3",
+    "file-type": "22.1.0",
+    "lodash.set": "file:config/cloud-runtime/vendor/shixue-lodash-set-safe-1.0.1.tgz",
+    "music-metadata": "11.15.0",
+    "wx-server-sdk": "4.0.2"
   },
   "devDependencies": {
     "@cloudbase/manager-node": "5.8.7",
-    "@cloudbase/node-sdk": "3.18.3",
     "@eslint/js": "10.0.1",
     "@types/node": "24.13.4",
+    "decompress": "file:vendor/tarballs/shixue-decompress-safe-1.0.0.tgz",
     "esbuild": "0.28.2",
     "eslint": "10.10.0",
     "globals": "17.12.0",
@@ -49,8 +54,7 @@
     "tsx": "4.23.13",
     "typescript": "5.9.3",
     "typescript-eslint": "8.70.0",
-    "vitest": "5.0.1",
-    "decompress": "file:vendor/tarballs/shixue-decompress-safe-1.0.0.tgz"
+    "vitest": "5.0.1"
   },
   "overrides": {
     "@cloudbase/node-sdk": {

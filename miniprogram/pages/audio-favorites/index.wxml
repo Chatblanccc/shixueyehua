@@ -1,0 +1,12 @@
+<import src="../night-talk/audio-list.wxml" />
+<view wx:if="{{isOnboarded || previewMode}}" class="page audio-page">
+  <view wx:if="{{previewMode}}" class="preview-tag">页面预览 · 尚未登录</view>
+  <text class="eyebrow">把喜欢的声音，轻轻收好</text><text class="page-title">我的收藏</text><text class="page-description library-intro">那些值得再听一次的陪伴。</text>
+  <view wx:if="{{audioList.loading}}" class="audio-skeleton"><view class="skeleton-line"></view><view class="skeleton-line short"></view><t-loading theme="circular" text="正在找回你的夜话…" /></view>
+  <view wx:elif="{{audioList.errorMessage}}" class="card audio-empty"><empty-state icon="error-circle" title="这次没能连接上" description="{{audioList.errorMessage}}" /><t-button custom-style="width:100%;margin-left:0;margin-right:0" theme="primary" block bind:tap="onRetry">重新加载</t-button></view>
+  <block wx:elif="{{audioList.items.length}}"><template is="audio-cards" data="{{programs, failedCovers}}" /><template is="audio-list-footer" data="{{audioList}}" /></block>
+  <view wx:else class="card audio-empty"><empty-state icon="heart" title="{{previewMode ? '连接学校后，开启你的夜话' : '还没有收藏的夜话'}}" description="{{previewMode ? '当前预览没有真实账号，不会生成收听记录或收藏。' : '在夜话详情点击收藏，就能把喜欢的声音留在这里。'}}" /><view class="library-empty-action"><t-button id="library-back-night" custom-style="width:100%;margin-left:0;margin-right:0" theme="default" block bind:tap="onGoNightTalk">去夜话看看</t-button></view></view>
+  <view class="page-footnote">这里只展示当前学校与班级仍可收听的夜话</view>
+  <mini-player />
+</view>
+<view wx:else class="gate"><t-loading theme="circular" text="正在连接校园…" /></view>

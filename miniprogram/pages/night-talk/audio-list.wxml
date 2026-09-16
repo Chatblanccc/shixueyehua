@@ -1,0 +1,13 @@
+<template name="audio-cards">
+  <button wx:for="{{programs}}" wx:key="_id" class="audio-card" data-id="{{item._id}}" bindtap="onOpenAudio" aria-label="{{item.title}}，{{item.progressLabel}}">
+    <view class="audio-cover"><view class="default-cover"><text>夜</text><text class="default-cover-caption">听见校园</text></view><image wx:if="{{item.coverUrl && !failedCovers[item._id]}}" src="{{item.coverUrl}}" mode="aspectFill" data-id="{{item._id}}" binderror="onCoverError" /></view>
+    <view class="audio-card-body"><text class="audio-card-title">{{item.title}}</text><text class="audio-speaker">{{item.speakerName}}<text wx:if="{{item.speakerTitle}}"> · {{item.speakerTitle}}</text></text><text class="audio-meta">{{item.dateLabel}} · {{item.durationLabel}}</text><view class="audio-card-footer"><text class="audio-progress-label">{{item.progressLabel}}</text><t-icon wx:if="{{item.favorite}}" name="heart-filled" size="26rpx" /></view><view wx:if="{{item.progress}}" class="progress-track"><view style="width:{{item.progressPercent}}%"></view></view></view>
+    <t-icon class="audio-arrow" name="chevron-right" size="30rpx" />
+  </button>
+</template>
+<template name="audio-list-footer">
+  <view wx:if="{{audioList.loadingMore}}" class="list-status"><t-loading theme="circular" text="正在找回下一段声音…" /></view>
+  <view wx:elif="{{audioList.moreError}}" class="list-error"><text>{{audioList.moreError}}</text><t-button theme="default" variant="text" bind:tap="onLoadMore">重试加载</t-button></view>
+  <view wx:elif="{{audioList.hasMore}}" class="list-status"><t-button theme="default" variant="text" bind:tap="onLoadMore">加载更多夜话</t-button></view>
+  <text wx:elif="{{audioList.items.length}}" class="list-end">这一页的陪伴，已全部收好</text>
+</template>
