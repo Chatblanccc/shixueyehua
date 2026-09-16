@@ -9,6 +9,7 @@ import type { OwnLetter, UserProfile, ErrorCode } from '../generated/shared';
 export interface LocalLetter extends OwnLetter {
   authorId: string;
   requestKey: string;
+  images?: { fileId: string; path: string }[];
 }
 export class LocalLetterError extends Error {
   constructor(readonly code: ErrorCode) {
@@ -27,30 +28,45 @@ export function localLetterAction(
   nextId: () => string,
 ): unknown {
   if (
-    !['createDraft', 'updateDraft', 'submit', 'withdraw', 'delete', 'detail', 'listMine'].includes(
-      action,
-    )
+    ![
+      'createDraft',
+      'updateDraft',
+      'submit',
+      'withdraw',
+      'delete',
+      'detail',
+      'listMine',
+      'storeLocalImage',
+      'imageUrls',
+      'cleanupImages',
+    ].includes(action)
   )
     fail('NOT_IMPLEMENTED');
   if (user.status !== 'active') fail('USER_DISABLED');
   const allowed =
-    action === 'createDraft'
-      ? ['requestKey', 'title', 'content', 'recipientType', 'visibility', 'imageFileIds']
-      : action === 'updateDraft'
-        ? [
-            'letterId',
-            'revision',
-            'title',
-            'content',
-            'recipientType',
-            'visibility',
-            'imageFileIds',
-          ]
-        : action === 'listMine'
-          ? ['cursor']
-          : action === 'detail'
-            ? ['letterId']
-            : ['letterId', 'revision'];
+    action === 'storeLocalImage'
+      ? ['letterId', 'revision', 'localPath']
+      : action === 'imageUrls'
+        ? ['letterId', 'fileIds']
+        : action === 'cleanupImages'
+          ? ['letterId']
+          : action === 'createDraft'
+            ? ['requestKey', 'title', 'content', 'recipientType', 'visibility', 'imageFileIds']
+            : action === 'updateDraft'
+              ? [
+                  'letterId',
+                  'revision',
+                  'title',
+                  'content',
+                  'recipientType',
+                  'visibility',
+                  'imageFileIds',
+                ]
+              : action === 'listMine'
+                ? ['cursor']
+                : action === 'detail'
+                  ? ['letterId']
+                  : ['letterId', 'revision'];
   if (Object.keys(p).some((k) => !allowed.includes(k))) fail('INVALID_ARGUMENT');
   if (action === 'listMine') {
     const cursor = p.cursor === undefined ? undefined : readString(p.cursor);
@@ -99,14 +115,37 @@ export function localLetterAction(
   if (!old) return fail('LETTER_NOT_FOUND');
   if (action === 'delete' && old.reviewStatus === 'deleted') return parseOwnLetter(old);
   if (old.reviewStatus === 'deleted') fail('LETTER_NOT_FOUND');
+  const validateImages = (ids: string[]) => {
+    if (ids.length > 3 || new Set(ids).size !== ids.length) fail('INVALID_ARGUMENT');
+    if (ids.some((id) => !old.images?.some((v) => v.fileId === id)))
+      fail('CONTENT_CHECK_UNAVAILABLE');
+  };
+  if (action === 'cleanupImages') return { cleaned: 0 };
+  if (action === 'imageUrls') {
+    if (!Array.isArray(p.fileIds) || !p.fileIds.every((v) => typeof v === 'string'))
+      fail('INVALID_ARGUMENT');
+    const ids = p.fileIds as string[];
+    validateImages(ids);
+    return { urls: ids.map((id) => old.images!.find((v) => v.fileId === id)!.path) };
+  }
   if (action === 'detail') return parseOwnLetter(old);
   if (!Number.isSafeInteger(p.revision) || p.revision !== old.revision)
     fail('LETTER_STATE_CONFLICT');
   let next = { ...old, updatedAt: now };
+  if (action === 'storeLocalImage') {
+    if (!['draft', 'rejected'].includes(old.reviewStatus)) fail('LETTER_STATE_CONFLICT');
+    const path = readString(p.localPath, 2048);
+    if (!/^(wxfile:\/\/|https?:\/\/(usr|store)\/)/.test(path)) fail('INVALID_ARGUMENT');
+    const kept = (old.images ?? []).filter((v) => old.imageFileIds.includes(v.fileId));
+    if (kept.length >= 3) fail('INVALID_ARGUMENT');
+    const fileId = `local-image-${nextId()}`;
+    letters[index] = { ...old, images: [...kept, { fileId, path }] };
+    return { fileId };
+  }
   if (action === 'updateDraft') {
     if (!['draft', 'rejected'].includes(old.reviewStatus)) fail('LETTER_STATE_CONFLICT');
     const fields = parseLetterFields({ ...old, ...p });
-    if (fields.imageFileIds.length) fail('CONTENT_CHECK_UNAVAILABLE');
+    validateImages(fields.imageFileIds);
     next = {
       ...next,
       ...fields,
@@ -119,7 +158,7 @@ export function localLetterAction(
     if (!['draft', 'rejected'].includes(old.reviewStatus)) fail('LETTER_STATE_CONFLICT');
     if (!validLetterSubmission(old)) fail('INVALID_ARGUMENT');
     if (containsLetterContact(old)) fail('CONTENT_REJECTED');
-    if (old.imageFileIds.length) fail('CONTENT_CHECK_UNAVAILABLE');
+    validateImages(old.imageFileIds);
     if (!user.identity || !user.currentClassId || !user.currentSchoolId)
       fail('CLASS_NOT_AVAILABLE');
     // This is an explicitly isolated demo queue, never a platform safety result or publication.

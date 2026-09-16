@@ -51,6 +51,22 @@ function mp3(): Buffer {
   return Buffer.concat(Array.from({ length: 40 }, () => frame));
 }
 describe('real media parsing and bounded storage adapter', () => {
+  it('allows only quarantine image grants and refuses cross-domain sealing for letters', async () => {
+    const { storage, sdk } = setup();
+    const image = raw.replace('audio-quarantine', 'letter-quarantine').replace('.mp3', '.png');
+    expect((await storage.prepare(image, now)).fileId).toBe(fileId(image));
+    await expect(storage.prepare(image.replace('quarantine', 'media'), now)).rejects.toThrow();
+    await expect(
+      storage.inspectAndSeal({
+        sourceFileId: fileId(image),
+        finalPath: image.replace('letter-quarantine', 'audio-media'),
+        kind: 'cover',
+        expectedBytes: 8,
+        maxBytes: 10,
+      }),
+    ).rejects.toThrow();
+    expect(sdk.getTempFileURL).not.toHaveBeenCalled();
+  });
   it('derives actual signed expiry and a PUT grant for the exact quarantine path', async () => {
     const { storage } = setup();
     const ticket = await storage.prepare(raw, now);

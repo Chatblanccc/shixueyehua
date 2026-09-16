@@ -11,6 +11,10 @@ import type { Domain } from './handler';
 import { CloudSafetyJobStore } from './safety-jobs-db';
 import { createMediaSafetySink } from './safety-jobs';
 import { createSafetyHttpHandler } from './safety-http';
+import { createLetterImages } from '../letterApi/images';
+import { createImageSafetyCoordinator } from './safety-submission';
+import { CloudImageCheckStore } from './safety-submission-db';
+import { AppError } from './errors';
 
 let initialized = false;
 export function createRuntimeSafetyCallback() {
@@ -43,22 +47,42 @@ function sdk() {
 
 /** Lazy SDK initialization allows isolated package loading without contacting a cloud environment. */
 export function createRuntimeHandler(domain: Domain) {
+  const database = () => {
+    const options: { env?: string; throwOnNotFound: boolean } = { throwOnNotFound: false };
+    return sdk().database(options);
+  };
+  const repository = new CloudRepository(database);
+  const storage = createAudioStorage(() => {
+    const context: unknown = sdk().getWXContext();
+    if (!isRecord(context) || typeof context.ENV !== 'string' || !context.ENV)
+      throw new Error('Cloud environment is unavailable');
+    return context.ENV;
+  });
+  const letterImages = createLetterImages(repository, storage);
+  const contentSafety = createContentSafety({
+    platform: createWechatSafetyPlatform(() => sdk().openapi),
+    resolveImage: (actor, fileId) => letterImages.resolve(actor.openid, fileId),
+  });
   return createHandler(domain, {
-    // No image resolver until TASK-401 binds verified uploads to their trusted owner.
-    // Missing image configuration fails closed; no raw client media URL is accepted.
-    contentSafety: createContentSafety({
-      platform: createWechatSafetyPlatform(() => sdk().openapi),
-    }),
-    repository: new CloudRepository(() => {
-      const options: { env?: string; throwOnNotFound: boolean } = { throwOnNotFound: false };
-      return sdk().database(options);
-    }),
-    audioStorage: createAudioStorage(() => {
-      const context: unknown = sdk().getWXContext();
-      if (!isRecord(context) || typeof context.ENV !== 'string' || !context.ENV)
-        throw new Error('Cloud environment is unavailable');
-      return context.ENV;
-    }),
+    contentSafety,
+    repository,
+    audioStorage: storage,
+    letterImages,
+    imageChecks: {
+      async check(input) {
+        if (
+          !process.env.SHIXUE_CALLBACK_APP_ID ||
+          !process.env.SHIXUE_CALLBACK_TOKEN ||
+          !process.env.SHIXUE_CALLBACK_AES_KEY
+        )
+          throw new AppError('CONTENT_CHECK_UNAVAILABLE');
+        return createImageSafetyCoordinator({
+          appId: process.env.SHIXUE_CALLBACK_APP_ID,
+          store: new CloudImageCheckStore(database),
+          safety: contentSafety,
+        }).check(input);
+      },
+    },
     audioUploadLimits: {
       audioMaxBytes: uploadLimit(
         'SHIXUE_AUDIO_MAX_BYTES',

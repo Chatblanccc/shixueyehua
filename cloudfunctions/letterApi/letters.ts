@@ -15,6 +15,8 @@ import { transactionUser } from '../_shared/user-transaction';
 import { assertScope, fields, relationId } from '../_shared/audio-common';
 import { identifier } from '../_shared/validate';
 import { AppError } from '../_shared/errors';
+import { validateLetterImages } from './images';
+import type { createImageSafetyCoordinator } from '../_shared/safety-submission';
 
 const EDIT_FIELDS = ['title', 'content', 'recipientType', 'visibility', 'imageFileIds'];
 function parseFields(p: unknown): LetterFields {
@@ -63,6 +65,7 @@ export async function letterAction(
   action: string,
   p: Record<string, unknown>,
   now: Date,
+  imageChecks?: ReturnType<typeof createImageSafetyCoordinator>,
 ): Promise<unknown> {
   const actor = await requireActiveUser(repo, openid);
   if (action === 'listMine') {
@@ -129,9 +132,31 @@ export async function letterAction(
       throw new AppError('LETTER_STATE_CONFLICT');
     if (!validLetterSubmission(snapshot)) throw new AppError('INVALID_ARGUMENT');
     if (containsLetterContact(snapshot)) throw new AppError('CONTENT_REJECTED');
-    if (!safety || snapshot.imageFileIds.length) throw new AppError('CONTENT_CHECK_UNAVAILABLE');
+    if (!safety) throw new AppError('CONTENT_CHECK_UNAVAILABLE');
+    validateLetterImages(snapshot, snapshot);
+    if (snapshot.imageFileIds.length > (await repo.letterImageLimit(actor.currentSchoolId ?? '')))
+      throw new AppError('CONTENT_CHECK_UNAVAILABLE');
     const checked = await safety.checkText({ openid }, snapshot);
     assertSafetyQueueAdmission([checked]);
+    const images = snapshot.imageFileIds.length
+      ? await (
+          imageChecks ?? {
+            check: async () => {
+              throw new AppError('CONTENT_CHECK_UNAVAILABLE');
+            },
+          }
+        ).check({
+          openid,
+          authorId: actor._id,
+          letterId: id,
+          revision: snapshot.revision,
+          contentHash: snapshot.contentHash,
+          imageFileIds: snapshot.imageFileIds,
+        })
+      : [];
+    if (images.length !== snapshot.imageFileIds.length)
+      throw new AppError('CONTENT_CHECK_UNAVAILABLE');
+    assertSafetyQueueAdmission([checked, ...images]);
     return repo.runTransaction(async (tx) => {
       const user = await transactionUser(tx, actor._id, openid);
       await assertScope(tx, user);
@@ -142,6 +167,9 @@ export async function letterAction(
       if (current.reviewStatus === 'pending') return dto(current);
       if (!['draft', 'rejected'].includes(current.reviewStatus))
         throw new AppError('LETTER_STATE_CONFLICT');
+      validateLetterImages(current, current);
+      if (current.imageFileIds.length > (await tx.letterImageLimit(user.currentSchoolId!)))
+        throw new AppError('CONTENT_CHECK_UNAVAILABLE');
       const value: LetterRecord = {
         ...current,
         schoolId: user.currentSchoolId!,
@@ -149,7 +177,12 @@ export async function letterAction(
         classId: user.currentClassId!,
         reviewStatus: 'pending',
         reviewReason: '',
-        safety: checked,
+        safety: {
+          ...checked,
+          decision: [checked, ...images].some((v) => v.decision === 'review') ? 'review' : 'pass',
+          labels: [...new Set([checked, ...images].flatMap((v) => v.labels))],
+          traceIds: [...new Set([checked, ...images].flatMap((v) => v.traceIds))],
+        },
         updatedAt: now,
       };
       await tx.saveLetter(value, true);
@@ -157,7 +190,7 @@ export async function letterAction(
     });
   }
   return repo.runTransaction(async (tx) => {
-    await transactionUser(tx, actor._id, openid);
+    const fresh = await transactionUser(tx, actor._id, openid);
     const old = owned(await tx.findLetter(id), actor._id);
     if (action === 'delete' && old.reviewStatus === 'deleted') return dto(old);
     version(p, old);
@@ -166,7 +199,15 @@ export async function letterAction(
     if (action === 'updateDraft') {
       if (!['draft', 'rejected'].includes(old.reviewStatus))
         throw new AppError('LETTER_STATE_CONFLICT');
-      const content = parseFields({ ...old, ...p });
+      let content: LetterFields;
+      try {
+        content = parseLetterFields({ ...old, ...p });
+      } catch {
+        throw new AppError('INVALID_ARGUMENT');
+      }
+      validateLetterImages(old, content);
+      if (content.imageFileIds.length > (await tx.letterImageLimit(fresh.currentSchoolId ?? '')))
+        throw new AppError('CONTENT_CHECK_UNAVAILABLE');
       next = {
         ...old,
         ...content,

@@ -9,7 +9,7 @@ export interface StorageSdkPort {
   deleteFile(input: { fileList: string[] }): Promise<unknown>;
 }
 const pathPattern =
-  /^audio-(quarantine|media)\/[A-Za-z0-9_-]+\/\d{4}\/[0-9a-f-]{36}\.(mp3|m4a|jpe?g|png|webp)$/;
+  /^(audio|letter)-(quarantine|media)\/[A-Za-z0-9_-]+\/\d{4}\/[0-9a-f-]{36}\.(mp3|m4a|jpe?g|png|webp)$/;
 const maxAudioBytes = 50 * 1024 * 1024;
 function fail(): never {
   throw new Error('音频存储校验失败，请重新上传或稍后重试。');
@@ -146,7 +146,7 @@ export class CloudAudioStorage implements AudioStoragePort {
     };
   }
   async prepare(cloudPath: string, now: Date): Promise<UploadGrant> {
-    if (!cloudPath.startsWith('audio-quarantine/')) fail();
+    if (!/^(audio|letter)-quarantine\//.test(cloudPath)) fail();
     return this.grant(cloudPath, now);
   }
   async temporaryUrl(fileId: string, maxAgeSeconds: number): Promise<string> {
@@ -169,8 +169,10 @@ export class CloudAudioStorage implements AudioStoragePort {
   }): Promise<VerifiedMedia & { fileId: string }> {
     const sourcePath = pathOf(input.sourceFileId, this.env());
     if (
-      !sourcePath.startsWith('audio-quarantine/') ||
-      !input.finalPath.startsWith('audio-media/') ||
+      !/^(audio|letter)-quarantine\//.test(sourcePath) ||
+      !input.finalPath.startsWith(`${sourcePath.split('-')[0]}-media/`) ||
+      (sourcePath.startsWith('letter-') &&
+        (input.kind !== 'cover' || !/\.(jpe?g|png)$/.test(sourcePath))) ||
       !pathPattern.test(input.finalPath) ||
       sourcePath.split('/')[1] !== input.finalPath.split('/')[1] ||
       sourcePath.split('.').pop() !== input.finalPath.split('.').pop() ||

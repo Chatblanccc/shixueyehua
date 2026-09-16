@@ -71,6 +71,9 @@ export class MemoryRepository implements Repository {
   async findLetter(id: string) {
     return this.letters.get(id);
   }
+  async letterImageLimit(_schoolId: string) {
+    return 3;
+  }
   async listOwnLetters(authorId: string, after?: string) {
     return [...this.letters.values()]
       .filter((v) => v.authorId === authorId && v.deletedAt === null && (!after || v._id > after))
@@ -264,6 +267,7 @@ export class MemoryRepository implements Repository {
       const audits: Omit<AdminLog, '_id'>[] = [];
       const transaction: TransactionRepository = {
         findLetter: async (id) => letters.get(id),
+        letterImageLimit: (schoolId) => this.letterImageLimit(schoolId),
         saveLetter: async (value) => {
           letters.set(value._id, value);
         },

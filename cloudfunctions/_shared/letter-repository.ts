@@ -1,5 +1,6 @@
 import type { LetterFields, LetterStatus } from '../../shared';
 import type { SafetyResult } from './content-safety';
+import type { AudioUploadRecord } from './audio-repository';
 export interface LetterRecord extends LetterFields {
   _id: string;
   authorId: string;
@@ -14,8 +15,10 @@ export interface LetterRecord extends LetterFields {
   updatedAt: Date;
   deletedAt: Date | null;
   safety: SafetyResult | null;
+  imageUploads?: AudioUploadRecord[];
 }
 export interface LetterReader {
+  letterImageLimit(schoolId: string): Promise<number>;
   findLetter(id: string): Promise<LetterRecord | undefined>;
 }
 export interface LetterTransaction extends LetterReader {

@@ -1,5 +1,7 @@
 import { listAudio, audioDetail, saveAudioProgress, setFavorite } from '../audioApi/audio';
 import { letterAction } from '../letterApi/letters';
+import type { createLetterImages } from '../letterApi/images';
+import type { createImageSafetyCoordinator } from './safety-submission';
 import {
   prepareUpload,
   confirmUpload,
@@ -44,6 +46,11 @@ export const DOMAIN_ACTIONS = {
   classApi: ['listSchools', 'listGrades', 'listClasses', 'selectClass', 'getCurrentClass'],
   audioApi: ['list', 'detail', 'saveProgress', 'history', 'toggleFavorite', 'listFavorites'],
   letterApi: [
+    'prepareImage',
+    'confirmImage',
+    'cancelImage',
+    'imageUrls',
+    'cleanupImages',
     'createDraft',
     'updateDraft',
     'submit',
@@ -93,6 +100,8 @@ export interface HandlerDependencies {
   audioStorage?: AudioStoragePort;
   audioUploadLimits?: AudioUploadLimits;
   contentSafety?: ContentSafetyPort;
+  letterImages?: ReturnType<typeof createLetterImages>;
+  imageChecks?: ReturnType<typeof createImageSafetyCoordinator>;
 }
 
 const ACTIVE_USER_ACTIONS = new Set([
@@ -175,6 +184,14 @@ export function createHandler(domain: Domain, dependencies: HandlerDependencies)
             );
         } else if (
           domain === 'letterApi' &&
+          ['prepareImage', 'confirmImage', 'cancelImage', 'imageUrls', 'cleanupImages'].includes(
+            action,
+          )
+        ) {
+          if (!dependencies.letterImages) throw new AppError('CONTENT_CHECK_UNAVAILABLE');
+          data = await dependencies.letterImages.action(openid, action, parsed.payload, now);
+        } else if (
+          domain === 'letterApi' &&
           [
             'createDraft',
             'updateDraft',
@@ -192,6 +209,7 @@ export function createHandler(domain: Domain, dependencies: HandlerDependencies)
             action,
             parsed.payload,
             now,
+            dependencies.imageChecks,
           );
         } else if (domain === 'audioApi') {
           if (action === 'list' || action === 'history' || action === 'listFavorites')

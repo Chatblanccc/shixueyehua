@@ -1,53 +1,10 @@
-<view wx:if="{{isOnboarded || previewMode}}" class="page">
-  <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
-  <view wx:elif="{{currentClass}}" class="preview-tag">{{currentClass.school.name}} · {{currentClass.class.name}}</view>
-  <view wx:elif="{{classError}}" class="preview-tag">{{classError}}</view>
-  <text class="eyebrow">落笔，是另一种拥抱</text>
-  <text class="page-title">一封家书</text>
-  <text class="page-description">写下平日没说出口的话，寄给重要的人。</text>
-
-  <view class="letter-invitation">
-    <view class="letter-corner" aria-hidden="true"></view>
-    <view class="letter-stamp" aria-hidden="true"><t-icon name="mail" size="44rpx" /></view>
-    <text class="letter-salutation">亲爱的家人：</text>
-    <text class="letter-thought">关于成长，关于感谢，<text class="block-line">关于我们一起走过的日子。</text></text>
-    <view class="letter-lines" aria-hidden="true"><view></view><view></view></view>
-    <text class="letter-signature">把心意，写进一封信里。</text>
-  </view>
-  <view class="compose-button">
-    <t-button id="new-letter" theme="primary" size="large" block disabled="{{busy || previewMode}}" bind:tap="onNew">写一封文字家书</t-button>
-  </view>
-  <view wx:if="{{localExperience}}" class="preview-tag">本地体验：保存与待审状态仅在本机，非微信内容审核，不会公开</view>
-  <view wx:if="{{letterError}}" class="card letter-error"><text>{{letterError}}</text><button size="mini" bindtap="onRetry">刷新列表</button></view>
-  <view wx:if="{{editorOpen}}" class="card letter-editor">
-    <text class="section-title">{{letterId ? '编辑家书' : '落笔成信'}}</text>
-    <input id="letter-title" placeholder="标题（提交需 2～30 字）" value="{{editor.title}}" maxlength="30" disabled="{{busy}}" bindinput="onTitle" />
-    <picker range="{{recipientNames}}" value="{{recipientIndex}}" disabled="{{busy}}" bindchange="onRecipient"><view class="letter-picker">写给：{{recipientNames[recipientIndex]}}</view></picker>
-    <textarea id="letter-content" placeholder="把想说的话写下来（提交需 20～3000 字）" value="{{editor.content}}" maxlength="3000" disabled="{{busy}}" auto-height bindinput="onContent" />
-    <text class="section-note">{{editor.content.length}} / 3000 · 请勿填写联系方式或外部链接</text>
-    <picker range="{{scopeNames}}" value="{{scopeIndex}}" disabled="{{busy}}" bindchange="onScope"><view class="letter-picker">展示范围：{{scopeNames[scopeIndex]}}</view></picker>
-    <text class="section-note">公开展示仍需管理员审核；图片上传将在下一步开放。</text>
-    <view class="letter-actions"><t-button id="save-letter" disabled="{{busy}}" bind:tap="onSave">保存草稿</t-button><t-button id="submit-letter" theme="primary" loading="{{busy}}" disabled="{{busy}}" bind:tap="onSubmit">提交审核</t-button></view>
-  </view>
-  <view class="section-heading"><text class="section-title">我的家书</text></view>
-  <view wx:if="{{listLoading}}" class="card"><t-loading theme="circular" text="正在读取家书…" /></view>
-  <view wx:elif="{{!letters.length}}" class="card"><text class="section-note">还没有已保存的家书，写下第一封吧。</text></view>
-  <view wx:for="{{letters}}" wx:key="_id" class="card own-letter">
-    <text class="section-title">{{item.title || '未命名草稿'}}</text>
-    <text class="section-note">{{item.reviewStatus === 'draft' ? '草稿' : item.reviewStatus === 'pending' ? '家书已送达，正在认真阅读' : item.reviewStatus === 'rejected' ? '未通过，请修改' : item.reviewStatus === 'hidden' ? '已隐藏' : '已通过'}}</text>
-    <text wx:if="{{item.reviewReason}}">{{item.reviewReason}}</text>
-    <view class="letter-actions"><button wx:if="{{item.reviewStatus === 'draft' || item.reviewStatus === 'rejected'}}" size="mini" data-id="{{item._id}}" disabled="{{busy}}" bindtap="onEdit">继续编辑</button><button wx:if="{{item.reviewStatus === 'pending' || item.reviewStatus === 'approved'}}" class="withdraw-letter" size="mini" data-id="{{item._id}}" data-action="withdraw" disabled="{{busy}}" bindtap="onTransition">撤回</button><button wx:if="{{item.reviewStatus === 'draft' || item.reviewStatus === 'rejected' || item.reviewStatus === 'hidden'}}" class="delete-letter" size="mini" data-id="{{item._id}}" data-action="delete" disabled="{{busy}}" bindtap="onTransition">删除</button></view>
-  </view>
-  <button wx:if="{{nextCursor}}" bindtap="onMore" disabled="{{busy || listLoading}}">更多家书</button>
-
-  <view class="section-heading">
-    <text class="section-title">精选家书</text>
-    <text class="section-note">每一封都被认真阅读</text>
-  </view>
-  <view class="card">
-    <empty-state icon="mail" title="等待第一封温暖的来信" description="精选展示与管理员审核正在开发中。当前提交仅进入待审核，不会公开。" />
-  </view>
-  <mini-player />
-  <view class="page-footnote">真诚落笔 · 温柔抵达</view>
+<view class="letters-home">
+  <view class="home-top"><text class="eyebrow">LETTERS · 家与远方</text><text class="mine-entry" bindtap="onMine">我的家书 ↗</text></view>
+  <text class="home-title">有些心意，<text class="block-line">值得落笔。</text></text>
+  <text class="home-subtitle">把平日没说出口的话，<text class="block-line">留给最重要的人。</text></text>
+  <view class="letter-invitation"><view class="letter-stamp">信</view><text class="letter-salutation">亲爱的家人：</text><text class="letter-thought">关于成长，关于感谢，<text class="block-line">关于我们一起走过的日子。</text></text><view class="letter-lines"><view></view><view></view></view><text class="letter-signature">真诚落笔 · 温柔抵达</text></view>
+  <button id="new-letter" class="write-entry" bindtap="onWrite">写一封家书 <text>＋</text></button>
+  <view class="showcase-heading"><text>纸短情长</text><text class="section-note">精选来信</text></view>
+  <view class="showcase-empty"><text>等待第一封温暖的来信</text><text class="section-note">审核与精选功能建设中，投稿不会直接公开。</text></view>
 </view>
-<view wx:else class="gate"><t-loading theme="circular" text="正在连接校园…" /></view>
+<mini-player />

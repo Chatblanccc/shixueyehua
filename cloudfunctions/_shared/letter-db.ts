@@ -1,6 +1,6 @@
 import { isRecord, parseOwnLetter, readString, readEnum } from '../../shared';
 import type { SafetyResult } from './content-safety';
-import { dbCall } from './audio-db';
+import { dbCall, parseUploadDocument } from './audio-db';
 import type { LetterRecord } from './letter-repository';
 export function parseLetterDocument(value: unknown): LetterRecord {
   if (
@@ -26,9 +26,9 @@ export function parseLetterDocument(value: unknown): LetterRecord {
       !(raw.checkedAt instanceof Date) ||
       !Number.isFinite(raw.checkedAt.getTime()) ||
       !Array.isArray(raw.labels) ||
-      raw.labels.length > 202 ||
+      raw.labels.length > 505 ||
       !Array.isArray(raw.traceIds) ||
-      raw.traceIds.length > 2
+      raw.traceIds.length > 5
     )
       throw new Error('Invalid safety evidence');
     safety = {
@@ -46,6 +46,7 @@ export function parseLetterDocument(value: unknown): LetterRecord {
   }
   return {
     ...dto,
+    ...(value.imageUploads === undefined ? {} : { imageUploads: parseUploads(value.imageUploads) }),
     authorId: readString(value.authorId),
     schoolId: readString(value.schoolId),
     gradeId: readString(value.gradeId),
@@ -56,6 +57,14 @@ export function parseLetterDocument(value: unknown): LetterRecord {
     deletedAt: value.deletedAt,
     safety,
   };
+}
+function parseUploads(value: unknown) {
+  if (!Array.isArray(value) || value.length > 6) throw new Error('Invalid letter uploads');
+  return value.map((v: unknown) => {
+    const upload = parseUploadDocument(v);
+    if (upload.kind !== 'cover' || upload.audioId) throw new Error('Invalid letter image');
+    return upload;
+  });
 }
 export async function queryOwnLetters(
   db: unknown,

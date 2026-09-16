@@ -1,0 +1,4 @@
+{
+  "navigationBarTitleText": "我的家书",
+  "usingComponents": { "t-loading": "tdesign-miniprogram/loading/loading" }
+}

@@ -1,0 +1,10 @@
+<view class="my-letters-page">
+  <text class="eyebrow">写过的话，都在这里</text><text class="page-title">我的家书</text><text class="page-description">每一封心意，都值得妥善收藏。</text>
+  <button id="new-letter" class="new-letter" bindtap="onNew">再写一封 ＋</button><text wx:if="{{letterError}}" class="form-error">{{letterError}}</text>
+  <view wx:if="{{listLoading}}"><t-loading theme="circular" text="正在读取家书…" /></view><view wx:elif="{{!letters.length}}" class="empty-letter">还没有家书，从一句想说的话开始吧。</view>
+  <view wx:for="{{letters}}" wx:key="_id" class="own-letter">
+    <text class="letter-status">{{item.reviewStatus === 'draft' ? '草稿 · 静候落笔' : item.reviewStatus === 'pending' ? '待审核 · 已送达' : item.reviewStatus === 'rejected' ? '需修改' : item.reviewStatus === 'hidden' ? '已隐藏' : '已通过'}}</text>
+    <text class="letter-list-title">{{item.title || '未命名草稿'}}</text><text class="letter-excerpt">{{item.content || '还没写下正文'}}</text><text wx:if="{{item.imageFileIds.length}}" class="section-note">附 {{item.imageFileIds.length}} 张图片</text><text wx:if="{{item.reviewReason}}" class="form-error">{{item.reviewReason}}</text>
+    <view class="letter-actions"><button wx:if="{{item.reviewStatus === 'draft' || item.reviewStatus === 'rejected'}}" size="mini" data-id="{{item._id}}" disabled="{{busy}}" bindtap="onEdit">继续编辑</button><button wx:if="{{item.reviewStatus === 'pending' || item.reviewStatus === 'approved'}}" size="mini" data-id="{{item._id}}" data-action="withdraw" disabled="{{busy}}" bindtap="onTransition">撤回</button><button wx:if="{{item.reviewStatus === 'draft' || item.reviewStatus === 'rejected' || item.reviewStatus === 'hidden'}}" size="mini" data-id="{{item._id}}" data-action="delete" disabled="{{busy}}" bindtap="onTransition">删除</button></view>
+  </view><button wx:if="{{nextCursor}}" bindtap="onMore" disabled="{{busy || listLoading}}">更多家书</button>
+</view>

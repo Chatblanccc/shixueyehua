@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import { LocalRepository } from '../../miniprogram/services/local-repository';
 import { createCloudClient } from '../../miniprogram/services/cloud-client';
-import { parseOwnLetter, parseOwnLetterPage, parseLoginResult } from '../../shared';
+import { parseOwnLetter, parseOwnLetterPage, parseLoginResult, isRecord } from '../../shared';
 import { readLetterEditor, saveLetterEditor } from '../../miniprogram/services/letter-editor-cache';
 const fields = {
   title: '给未来的自己',
@@ -32,6 +32,32 @@ function setup() {
 }
 afterEach(() => vi.unstubAllGlobals());
 describe('local text letter experience', () => {
+  it('persists owned local attachments across reopening and submits them only in local mode', async () => {
+    const { call, reopen } = setup();
+    let d = await call('letterApi', 'createDraft', parseOwnLetter, {
+      requestKey: 'images',
+      ...fields,
+    });
+    const receipt = await call('letterApi', 'storeLocalImage', (v) => v, {
+      letterId: d._id,
+      revision: 1,
+      localPath: 'http://store/saved-letter.png',
+    });
+    if (!isRecord(receipt)) throw Error('receipt');
+    d = await call('letterApi', 'updateDraft', parseOwnLetter, {
+      letterId: d._id,
+      revision: 1,
+      imageFileIds: [receipt.fileId],
+    });
+    reopen();
+    expect(
+      await call('letterApi', 'imageUrls', (v) => v, { letterId: d._id, fileIds: d.imageFileIds }),
+    ).toEqual({ urls: ['http://store/saved-letter.png'] });
+    expect(
+      await call('letterApi', 'submit', parseOwnLetter, { letterId: d._id, revision: 2 }),
+    ).toMatchObject({ reviewStatus: 'pending' });
+    expect(d).not.toHaveProperty('images');
+  });
   it('survives reopen, submits idempotently, withdraws, and deletes without touching audio', async () => {
     const { call, reopen } = setup();
     await call('authApi', 'login', parseLoginResult);

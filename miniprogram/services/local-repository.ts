@@ -17,6 +17,13 @@ import type { CloudInvocation } from './cloud-client';
 import { localLetterAction, LocalLetterError } from './local-letters';
 import type { LocalLetter } from './local-letters';
 import { parseOwnLetter } from '../generated/shared';
+function parseLocalImages(value: unknown) {
+  if (!Array.isArray(value) || value.length > 3) throw new Error('本地图片记录无效');
+  return value.map((v: unknown) => {
+    if (!isRecord(v)) throw new Error('本地图片记录无效');
+    return { fileId: readString(v.fileId), path: readString(v.path, 2048) };
+  });
+}
 
 const SCHOOL = 'demo-school';
 const GRADE = 'demo-grade';
@@ -127,6 +134,7 @@ function restore(value: unknown): LocalState {
                 ...parseOwnLetter(v),
                 authorId: readString(v.authorId),
                 requestKey: readString(v.requestKey),
+                ...(v.images === undefined ? {} : { images: parseLocalImages(v.images) }),
               };
             })
           : (() => {
