@@ -2,7 +2,11 @@ import { describe, expect, it, vi, afterEach } from 'vitest';
 import { LocalRepository } from '../../miniprogram/services/local-repository';
 import { createCloudClient } from '../../miniprogram/services/cloud-client';
 import { parseOwnLetter, parseOwnLetterPage, parseLoginResult, isRecord } from '../../shared';
-import { readLetterEditor, saveLetterEditor } from '../../miniprogram/services/letter-editor-cache';
+import {
+  readLetterEditor,
+  saveLetterEditor,
+  clearDeletedLetterEditor,
+} from '../../miniprogram/services/letter-editor-cache';
 const fields = {
   title: '给未来的自己',
   content: '希望未来的你仍然保持好奇，珍惜陪伴我们的人，认真对待每一个平凡的日子。',
@@ -32,6 +36,28 @@ function setup() {
 }
 afterEach(() => vi.unstubAllGlobals());
 describe('local text letter experience', () => {
+  it('clears only the deleted letter editor cache for the current account and mode', () => {
+    const map = new Map<string, unknown>();
+    let local = true;
+    vi.stubGlobal('wx', {
+      getStorageSync: (k: string) => (k === 'shixue-local-enabled-v1' ? local : map.get(k)),
+      setStorageSync: (k: string, v: unknown) => map.set(k, v),
+      removeStorageSync: (k: string) => map.delete(k),
+    });
+    const cache = { letterId: 'draft-a', revision: 1, requestKey: 'key', fields };
+    saveLetterEditor('one', cache);
+    saveLetterEditor('two', cache);
+    local = false;
+    saveLetterEditor('one', cache);
+    local = true;
+    clearDeletedLetterEditor('one', 'draft-b');
+    expect(readLetterEditor('one')).toEqual(cache);
+    clearDeletedLetterEditor('one', 'draft-a');
+    expect(readLetterEditor('one')).toBeUndefined();
+    expect(readLetterEditor('two')).toEqual(cache);
+    local = false;
+    expect(readLetterEditor('one')).toEqual(cache);
+  });
   it('persists owned local attachments across reopening and submits them only in local mode', async () => {
     const { call, reopen } = setup();
     let d = await call('letterApi', 'createDraft', parseOwnLetter, {

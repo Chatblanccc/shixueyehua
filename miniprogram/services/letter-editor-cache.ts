@@ -15,6 +15,10 @@ export function saveLetterEditor(userId: string, value: LetterEditorDraft): void
 export function clearLetterEditor(userId: string): void {
   wx.removeStorageSync(key(userId));
 }
+export function clearDeletedLetterEditor(userId: string, letterId: string): void {
+  const value: unknown = wx.getStorageSync(key(userId));
+  if (isRecord(value) && value.letterId === letterId) clearLetterEditor(userId);
+}
 export function readLetterEditor(userId: string): LetterEditorDraft | undefined {
   const value: unknown = wx.getStorageSync(key(userId));
   if (!value) return undefined;

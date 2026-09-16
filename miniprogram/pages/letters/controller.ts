@@ -7,6 +7,7 @@ import {
   readLetterEditor,
   saveLetterEditor,
   clearLetterEditor,
+  clearDeletedLetterEditor,
 } from '../../services/letter-editor-cache';
 import { parseLetterFields } from '../../generated/shared';
 import type { OwnLetter, LetterFields } from '../../generated/shared';
@@ -361,6 +362,7 @@ export function registerLetterPage(mode: 'editor' | 'list') {
       this.setData({ busy: true, letterError: '' });
       try {
         await letterService.transition(d._id, d.revision, action);
+        if (action === 'delete') clearDeletedLetterEditor(this.owner, d._id);
         if (this.data.letterId === d._id) {
           clearLetterEditor(this.owner);
           this.setData({ editorOpen: false, dirty: false, letterId: '' });

@@ -214,6 +214,13 @@ try {
     )
   )
     throw Error('家书撤回失败');
+  // Simulate edits left behind by the independent editor before deleting from the list.
+  await app.callWxMethod('setStorageSync', editorKey, {
+    letterId,
+    revision: 1,
+    requestKey: 'deleted-editor-regression',
+    fields: restored.editor,
+  });
   await tap(`button[data-id="${letterId}"][data-action="delete"]`);
   const deleted = await state();
   if (
@@ -221,7 +228,9 @@ try {
     deleted.letters.some((v: unknown) => isRecord(v) && v._id === letterId)
   )
     throw Error('家书删除后仍在列表');
-  checks.push('家书撤回与软删除（原生确认框自动应答）');
+  if (await app.callWxMethod('getStorageSync', editorKey))
+    throw Error('删除后仍遗留该家书的编辑缓存');
+  checks.push('家书撤回、软删除并清理匹配编辑缓存（原生确认框自动应答）');
   await app.restoreWxMethod('showModal');
   if (errors.length) throw Error(errors.join('\n'));
   await writeFile(
