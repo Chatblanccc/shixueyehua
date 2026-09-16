@@ -1,4 +1,5 @@
 import type { AudioProgram, PlayProgress, Favorite } from '../../shared';
+import type { LetterRecord } from '../../cloudfunctions/_shared/letter-repository';
 import type {
   AudioQuery,
   AudioUploadRecord,
@@ -66,6 +67,16 @@ export function classroom(overrides: Partial<Class> = {}): Class {
 
 /** In-memory test repository only; no production import or runtime mock switch exists. */
 export class MemoryRepository implements Repository {
+  readonly letters = new Map<string, LetterRecord>();
+  async findLetter(id: string) {
+    return this.letters.get(id);
+  }
+  async listOwnLetters(authorId: string, after?: string) {
+    return [...this.letters.values()]
+      .filter((v) => v.authorId === authorId && v.deletedAt === null && (!after || v._id > after))
+      .sort((a, b) => a._id.localeCompare(b._id))
+      .slice(0, 21);
+  }
   readonly users = new Map<string, User>();
   readonly schools = new Map<string, School>();
   readonly grades = new Map<string, Grade>();
@@ -240,6 +251,7 @@ export class MemoryRepository implements Repository {
     try {
       this.beforeTransaction?.();
       const users = structuredClone(this.users);
+      const letters = structuredClone(this.letters);
       const schools = structuredClone(this.schools);
       const grades = structuredClone(this.grades);
       const classes = structuredClone(this.classes);
@@ -251,6 +263,10 @@ export class MemoryRepository implements Repository {
       const quotas = structuredClone(this.quotas);
       const audits: Omit<AdminLog, '_id'>[] = [];
       const transaction: TransactionRepository = {
+        findLetter: async (id) => letters.get(id),
+        saveLetter: async (value) => {
+          letters.set(value._id, value);
+        },
         findAudio: async (id) => audios.get(id),
         findProgress: async (id) => progresses.get(id),
         findFavorite: async (id) => favorites.get(id),
@@ -290,6 +306,8 @@ export class MemoryRepository implements Repository {
         },
       };
       const result = await work(transaction);
+      this.letters.clear();
+      for (const [id, value] of letters) this.letters.set(id, value);
       this.users.clear();
       for (const [id, value] of users) this.users.set(id, value);
       this.memberships.clear();

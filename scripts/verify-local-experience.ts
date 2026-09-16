@@ -14,6 +14,8 @@ const errors: string[] = [];
 const checks: string[] = [];
 app.on('exception', (error: unknown) => errors.push(String(error)));
 let baseline: unknown;
+let editorBaseline: unknown;
+const editorKey = 'shixue-letter-editor-local-demo-listener';
 async function waitForRoute(route: string) {
   for (let i = 0; i < 60; i++) {
     const current: unknown = await app.evaluate(
@@ -57,6 +59,7 @@ try {
   const night = await state();
   if (!night.localExperience || !isRecord(night.featured)) throw Error('没有实际本地节目');
   baseline = await app.callWxMethod('getStorageSync', 'shixue-local-data-v1');
+  editorBaseline = await app.callWxMethod('getStorageSync', editorKey);
   checks.push('明确进入本地模式并显示节目');
   await app.screenshot({ path: `${output}/night-talk.png` });
   await tap('#featured-audio');
@@ -132,6 +135,52 @@ try {
   if (isRecord(offline.featured) && offline.featured._id === audioId)
     throw Error('下架后节目仍可见');
   checks.push('下架后首页不再展示');
+  await app.switchTab('/pages/letters/index');
+  const letters = await waitForRoute('pages/letters/index');
+  await app.mockWxMethod('showModal', { confirm: true, cancel: false });
+  await tap('#new-letter');
+  await ((await letters.$('#letter-title')) as InputElement).input('给未来的自己');
+  await ((await letters.$('#letter-content')) as InputElement).input(
+    '希望未来的你仍然记得今天的努力，认真学习，热爱生活，也珍惜身边每一个关心你的人。',
+  );
+  await tap('#save-letter');
+  const letterDraft = await state();
+  const letterId = letterDraft.letterId;
+  if (typeof letterId !== 'string' || !letterId || letterDraft.dirty !== false)
+    throw Error(`家书草稿未保存: ${JSON.stringify(letterDraft)}`);
+  checks.push('家书真实输入并保存草稿');
+  await letters.waitFor(1600);
+  await app.screenshot({ path: `${output}/letter-draft.png` });
+  await tap('#submit-letter');
+  const submitted = await state();
+  if (
+    !Array.isArray(submitted.letters) ||
+    !submitted.letters.some(
+      (v: unknown) => isRecord(v) && v._id === letterId && v.reviewStatus === 'pending',
+    )
+  )
+    throw Error(`家书未进入待审核: ${JSON.stringify(submitted)}`);
+  checks.push('家书本地提交进入待审核（非微信内容审核）');
+  await letters.waitFor(1600);
+  await app.screenshot({ path: `${output}/letter-pending.png` });
+  await tap(`button[data-id="${letterId}"][data-action="withdraw"]`);
+  const withdrawn = await state();
+  if (
+    !Array.isArray(withdrawn.letters) ||
+    !withdrawn.letters.some(
+      (v: unknown) => isRecord(v) && v._id === letterId && v.reviewStatus === 'draft',
+    )
+  )
+    throw Error('家书撤回失败');
+  await tap(`button[data-id="${letterId}"][data-action="delete"]`);
+  const deleted = await state();
+  if (
+    !Array.isArray(deleted.letters) ||
+    deleted.letters.some((v: unknown) => isRecord(v) && v._id === letterId)
+  )
+    throw Error('家书删除后仍在列表');
+  checks.push('家书撤回与软删除（原生确认框自动应答）');
+  await app.restoreWxMethod('showModal');
   if (errors.length) throw Error(errors.join('\n'));
   await writeFile(
     `${output}/verification.json`,
@@ -162,7 +211,11 @@ try {
 } finally {
   await app.restoreWxMethod('showModal').catch(() => undefined);
   // Restore the pre-test local database instead of leaving test publications behind.
-  if (baseline) await app.callWxMethod('setStorageSync', 'shixue-local-data-v1', baseline);
+  if (baseline) {
+    await app.callWxMethod('setStorageSync', 'shixue-local-data-v1', baseline);
+    if (editorBaseline) await app.callWxMethod('setStorageSync', editorKey, editorBaseline);
+    else await app.callWxMethod('removeStorageSync', editorKey);
+  }
   await app.reLaunch('/pages/launch/index').catch(() => undefined);
   app.disconnect();
 }

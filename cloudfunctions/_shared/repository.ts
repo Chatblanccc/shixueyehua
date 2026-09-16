@@ -1,4 +1,5 @@
 import type { AudioRepository, AudioTransaction } from './audio-repository';
+import type { LetterReader, LetterTransaction, LetterRecord } from './letter-repository';
 import type { AdminLog, Class, ClassMembership, Grade, School, User } from '../../shared';
 
 export type UserPatch = Partial<
@@ -23,7 +24,8 @@ export interface OrganizationReader {
   findGrade(id: string): Promise<Grade | undefined>;
   findClass(id: string): Promise<Class | undefined>;
 }
-export interface TransactionRepository extends OrganizationReader, AudioTransaction {
+export interface TransactionRepository
+  extends OrganizationReader, AudioTransaction, LetterTransaction {
   findUser(id: string): Promise<User | undefined>;
   patchUser(id: string, patch: UserPatch): Promise<void>;
   findMembership(id: string): Promise<ClassMembership | undefined>;
@@ -32,7 +34,8 @@ export interface TransactionRepository extends OrganizationReader, AudioTransact
 }
 
 /** Injectable persistence boundary. Production is always CloudRepository. */
-export interface Repository extends OrganizationReader, AudioRepository {
+export interface Repository extends OrganizationReader, AudioRepository, LetterReader {
+  listOwnLetters(authorId: string, after?: string): Promise<LetterRecord[]>;
   findUserByOpenid(openid: string): Promise<User | undefined>;
   /** Atomic insert only: never use set/upsert for login. */
   insertUser(user: User): Promise<void>;

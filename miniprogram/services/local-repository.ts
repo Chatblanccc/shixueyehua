@@ -14,6 +14,9 @@ import type {
   ErrorCode,
 } from '../generated/shared';
 import type { CloudInvocation } from './cloud-client';
+import { localLetterAction, LocalLetterError } from './local-letters';
+import type { LocalLetter } from './local-letters';
+import { parseOwnLetter } from '../generated/shared';
 
 const SCHOOL = 'demo-school';
 const GRADE = 'demo-grade';
@@ -33,6 +36,7 @@ interface RecordAudio extends ManagedAudio {
   coverPath?: string;
 }
 interface LocalState {
+  letters: LocalLetter[];
   version: 1;
   user: UserProfile;
   audio: RecordAudio[];
@@ -79,6 +83,7 @@ function seed(now: string): LocalState {
   }));
   return {
     version: 1,
+    letters: [],
     sequence: 0,
     audio,
     progress: [],
@@ -112,6 +117,21 @@ function restore(value: unknown): LocalState {
     throw new Error('本地体验数据损坏，请在我的页面重置');
   return {
     version: 1,
+    letters:
+      value.letters === undefined
+        ? []
+        : Array.isArray(value.letters)
+          ? value.letters.map((v: unknown) => {
+              if (!isRecord(v)) throw new Error('本地家书数据无效');
+              return {
+                ...parseOwnLetter(v),
+                authorId: readString(v.authorId),
+                requestKey: readString(v.requestKey),
+              };
+            })
+          : (() => {
+              throw new Error('本地家书数据无效');
+            })(),
     sequence: value.sequence,
     user: parseUserProfile(value.user),
     audio: value.audio.map((entry: unknown) => {
@@ -180,7 +200,12 @@ export class LocalRepository {
     } catch (error: unknown) {
       return {
         success: false,
-        error: { code: error instanceof LocalError ? error.code : 'INVALID_ARGUMENT' },
+        error: {
+          code:
+            error instanceof LocalError || error instanceof LocalLetterError
+              ? error.code
+              : 'INVALID_ARGUMENT',
+        },
         requestId: 'local-experience',
       };
     }
@@ -193,6 +218,15 @@ export class LocalRepository {
   ): unknown {
     const user = state.user;
     const now = new Date(this.port.now()).toISOString();
+    if (domain === 'letterApi')
+      return localLetterAction(
+        state.letters,
+        user,
+        action,
+        p,
+        now,
+        () => `demo-letter-${String(++state.sequence).padStart(8, '0')}`,
+      );
     const login = () => ({ user, onboardingStep: 'ready' });
     if (domain === 'authApi') {
       if (action === 'login' || action === 'getProfile') return login();

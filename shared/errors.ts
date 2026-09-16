@@ -16,6 +16,7 @@ export const ERROR_MESSAGES = {
   CONTENT_CHECK_UNAVAILABLE: '暂时无法完成内容检查，草稿可保留，请稍后重试',
   CONTENT_CHECK_PENDING: '图片正在检查中，请稍后重试；草稿可保留',
   LETTER_STATE_CONFLICT: '当前状态不能执行此操作',
+  LETTER_NOT_FOUND: '这封家书不存在或无法访问',
   DUPLICATE_REQUEST: '请勿重复提交',
   RATE_LIMITED: '操作过于频繁，请稍后再试',
   TIMEOUT: '连接超时，请重试',

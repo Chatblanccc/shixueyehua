@@ -1,6 +1,6 @@
 # 文档总览
 
-家书前置开发进度：[TASK-600 内容安全适配](content-safety.md)已完成适配层、加密回调和事务绑定的本地测试；图片上传归属与投稿业务接入仍待完成，不代表真实平台审核验收。
+家书开发进度：[TASK-600 内容安全适配](content-safety.md)已随 [PR #4](https://github.com/Chatblanccc/shixueyehua/pull/4) 合并，PR 与 main CI 通过；[TASK-400 文字家书](letters.md)已实现文字草稿、提交、撤回/软删除及无云页面体验。图片上传归属与异步投稿接入仍待完成，不代表真实平台审核验收。
 
 2026-09-16 最新入口：[无云本地体验](local-experience.md)、[第三阶段音频](stage-3.md)、[当前实施与验收](implementation-plan.md)。已提供真实可播放的本地音频和管理员草稿/发布/下架流程；后续 TASK 同步提供本地体验。下述第一、二阶段记录保留历史验收证据。
 

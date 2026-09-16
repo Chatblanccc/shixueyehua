@@ -138,7 +138,7 @@ npm run verify:stage1
 | 2 身份与选班       | 200、201、202                | 本地验收通过；真实云与真机待验，详见 stage-2.md                    |
 | 3 夜话音频         | 300、301、302、303           | 用户侧本地验收通过；真实云、存储与真机待验，详见 stage-3.md        |
 | 3 夜话音频         | 304、305                     | 页面与本地业务体验已实现；真实文件选择、上传、云存储/事务待验      |
-| 4 一封家书         | 400、401、402、403、404、405 | 尚未实现；只有家书空态页面                                         |
+| 4 一封家书         | 400、401、402、403、404、405 | 400 文字流程与基础本地页面已实现；图片、完整编辑/列表、公开与审核等仍待完成 |
 | 5 管理中心         | 500、501、502、503、504      | 尚未实现；只有分包占位与权限入口守卫                               |
 | 6 内容安全前置     | 600                         | 适配层、加密回调与事务绑定本地通过；上传归属/投稿接入和真实平台待验 |
 | 6 安全、体验与发布 | 601、602、603、604           | 尚未验收；初始数据库 / 存储拒绝规则代码已随 102 交付               |
@@ -171,3 +171,13 @@ flowchart LR
 - TASK-600 仍部分完成：缺图片真实上传归属解析器、提交端任务登记/恢复接入、真实平台回调验收。下一项 TASK-400 开始家书草稿与文本提交闭环，TASK-401/601 同步补图片上传。未经归属与检查确认的图片不会被开放。
 - 完整协议、环境变量、HTTP 映射假设、文件清单及限制见 [内容安全记录](content-safety.md)。本轮未推送、创建 PR、合并或部署。
 - `npm run db:init -- --dry-run` 退出 0：16 个集合清单包含新增任务集合及三个索引，`cloudContacted=false`；`git diff --check` 通过。
+
+### TASK-600 交付与 TASK-400 文字家书推进
+
+- TASK-600 当前安全基础由提交 `c4b9b19` 推送，随后 [PR #4](https://github.com/Chatblanccc/shixueyehua/pull/4) 经 CI 后 squash 合并至 main `e857ab73faaabcd541519b3dfdab20556614c82b`。[PR CI](https://github.com/Chatblanccc/shixueyehua/actions/runs/35056800844) 与 [main CI](https://github.com/Chatblanccc/shixueyehua/actions/runs/35056867935) 均成功。合并的是已验证安全基础，不取消图片归属及真实平台的剩余验收项。
+- 新分支 `codex/task-400-letters`：实现文字家书 createDraft/updateDraft/submit/withdraw/delete，以及仅本人 detail/listMine。共享 DTO 白名单、服务端作者校验、可信组织绑定、草稿幂等、版本冲突、文本检查后事务复验和软删除均有测试。失败不清除草稿、不自动公开、不回退本地成功。
+- 同步提供原生家书 Tab 的文字编辑、保存/提交、本人列表和状态操作；本地模式持久化，未保存编辑按账号/模式隔离；重置体验明确清除家书。界面标注本地待审不是微信检查结果。基础页面支持 TASK-400 验收，不将 TASK-401/403 全部标记完成。
+- 修改文件清单、输入输出、状态机与限制见 [文字家书记录](letters.md)。新测试为 `tests/backend/letters.test.ts`、`tests/client/local-letters.test.ts`、`tests/database/letters-db.test.ts`；更新 fixtures、本地兼容测试和微信模拟器脚本。数据库清单增加 `letters.author_live_cursor` 索引。
+- 2026-09-16 12:59（北京时间），Node `22.23.2` 下 `npm run verify` 通过 lint、三套严格类型检查、**33 文件 / 439 项测试**和构建；格式检查通过。微信开发者工具首次新流程验收 9 项通过，异常 0，覆盖实际音频播放和文字家书输入、保存、待审、撤回、软删除。原生确认框自动应答，测试后恢复数据库及编辑缓存；随后截图复核修正标题输入框裁切并复验。
+- TASK-400 仍部分完成：非空图片列表失败关闭，图片数量配置/上传归属/异步检查接入待 TASK-401/601；审核、精选公开、举报另属后续 TASK。未调用真实 CloudBase、微信文本/图片安全或手机，未声称上线验收通过。本分支尚未推送或合并。
+- 最终复验：13:02:54 完整 `npm run verify` 通过 **33 文件 / 440 项测试**（补充提交时采用用户最新可信班级的用例），lint、三套 typecheck、构建均通过。13:02:59 模拟器 9 项再次通过，异常 0，截图确认标题不再裁切；报告 `artifacts/local-experience/verification.json` 明确 `confirmationMocked=true`、`cloudVerified=false`、`deviceVerified=false`。`format:check`、`check:cloud`、数据库初始化 dry-run（包含新增索引，未连接云）及 `git diff --check` 通过。

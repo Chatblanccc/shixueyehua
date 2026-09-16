@@ -7,6 +7,7 @@ import { localRepository } from '../../services/local.service';
 import { localModeEnabled } from '../../services/local-mode';
 import { startSession } from '../../services/session.service';
 import { runInAction } from 'mobx-miniprogram';
+import { clearLetterEditor } from '../../services/letter-editor-cache';
 
 Page({
   data: {
@@ -36,13 +37,15 @@ Page({
     if (!localModeEnabled()) return;
     const result = await wx.showModal({
       title: '重置本地体验？',
-      content: '仅清除本机示例资料、节目、收藏与进度，并恢复初始示例。不会影响云端数据。',
+      content:
+        '仅清除本机示例资料、节目、收藏、进度、家书与未保存草稿，并恢复初始示例。不会影响云端数据。',
       confirmText: '重置',
     });
     if (!result.confirm) return;
     playerService.pause();
     await playerService.flushProgress();
     localRepository().reset();
+    clearLetterEditor('demo-listener');
     playerService.clearScope();
     const storage = wx.getStorageInfoSync();
     for (const key of storage.keys)

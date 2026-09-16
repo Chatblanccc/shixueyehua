@@ -1,4 +1,5 @@
 import { listAudio, audioDetail, saveAudioProgress, setFavorite } from '../audioApi/audio';
+import { letterAction } from '../letterApi/letters';
 import {
   prepareUpload,
   confirmUpload,
@@ -172,6 +173,26 @@ export function createHandler(domain: Domain, dependencies: HandlerDependencies)
               now,
               requestId,
             );
+        } else if (
+          domain === 'letterApi' &&
+          [
+            'createDraft',
+            'updateDraft',
+            'submit',
+            'withdraw',
+            'delete',
+            'detail',
+            'listMine',
+          ].includes(action)
+        ) {
+          data = await letterAction(
+            dependencies.repository,
+            dependencies.contentSafety,
+            openid,
+            action,
+            parsed.payload,
+            now,
+          );
         } else if (domain === 'audioApi') {
           if (action === 'list' || action === 'history' || action === 'listFavorites')
             data = await listAudio(
