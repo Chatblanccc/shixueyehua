@@ -12,6 +12,7 @@ import {
 } from '../adminAudioApi/audio';
 import type { AudioUploadLimits } from '../adminAudioApi/audio';
 import type { AudioStoragePort } from './audio-storage-port';
+import type { ContentSafetyPort } from './content-safety';
 import { randomUUID } from 'node:crypto';
 import { isRecord } from '../../shared';
 import type { ApiResult } from '../../shared';
@@ -90,6 +91,7 @@ export interface HandlerDependencies {
   now?: () => Date;
   audioStorage?: AudioStoragePort;
   audioUploadLimits?: AudioUploadLimits;
+  contentSafety?: ContentSafetyPort;
 }
 
 const ACTIVE_USER_ACTIONS = new Set([

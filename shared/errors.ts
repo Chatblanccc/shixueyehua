@@ -13,6 +13,8 @@ export const ERROR_MESSAGES = {
   AUDIO_NOT_FOUND: '这期夜话已下架或不存在',
   UPLOAD_FAILED: '上传失败，请重试',
   CONTENT_REJECTED: '内容暂时无法提交，请修改后重试',
+  CONTENT_CHECK_UNAVAILABLE: '暂时无法完成内容检查，草稿可保留，请稍后重试',
+  CONTENT_CHECK_PENDING: '图片正在检查中，请稍后重试；草稿可保留',
   LETTER_STATE_CONFLICT: '当前状态不能执行此操作',
   DUPLICATE_REQUEST: '请勿重复提交',
   RATE_LIMITED: '操作过于频繁，请稍后再试',

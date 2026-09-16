@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import { isRecord } from '../shared';
+import { cloudPermissions } from './cloud-permissions';
 
 const names = ['authApi', 'classApi', 'audioApi', 'letterApi', 'adminAudioApi', 'adminApi'];
 const source = 'dist/cloudfunctions/authApi';
@@ -18,6 +19,15 @@ try {
   // Inspect actual deployment artifacts, including every local dependency archive.
   // All six packages must carry the exact same runtime and cannot rely on the repository.
   for (const name of names) {
+    const config: unknown = JSON.parse(
+      await readFile(`dist/cloudfunctions/${name}/config.json`, 'utf8'),
+    );
+    if (
+      !isRecord(config) ||
+      !isRecord(config.permissions) ||
+      JSON.stringify(config.permissions.openapi) !== JSON.stringify(cloudPermissions(name))
+    )
+      throw new Error(`${name} OpenAPI 权限与最小授权清单不一致。`);
     for (const file of runtimeFiles) {
       const expected = await readFile(`${source}/${file}`);
       const actual = await readFile(`dist/cloudfunctions/${name}/${file}`);

@@ -1,5 +1,7 @@
 # 文档总览
 
+家书前置开发进度：[TASK-600 内容安全适配](content-safety.md)已完成适配层、加密回调和事务绑定的本地测试；图片上传归属与投稿业务接入仍待完成，不代表真实平台审核验收。
+
 2026-09-16 最新入口：[无云本地体验](local-experience.md)、[第三阶段音频](stage-3.md)、[当前实施与验收](implementation-plan.md)。已提供真实可播放的本地音频和管理员草稿/发布/下架流程；后续 TASK 同步提供本地体验。下述第一、二阶段记录保留历史验收证据。
 
 本目录维护实学夜话 V0.1 的开发基线与实施资料。**阶段 2（TASK-200～202）本地验收通过。** 第二阶段开发分支为 `codex/stage-2-identity-classes`，交付见 [PR #2](https://github.com/Chatblanccc/shixueyehua/pull/2)，CI 与合并状态以 PR 记录为准。阶段 1 已通过 [PR #1](https://github.com/Chatblanccc/shixueyehua/pull/1) 合并（`20a5681`），GitHub Actions 通过。用户暂无正式 AppID 和关联云环境，已选择先完成本地开发；云端初始化、可信微信登录联调和手机验收仍待进行。
