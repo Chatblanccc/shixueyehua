@@ -6,7 +6,10 @@
     "pages/night-talk/index",
     "pages/letters/index",
     "pages/class/index",
-    "pages/profile/index"
+    "pages/profile/index",
+    "pages/audio-detail/index",
+    "pages/audio-history/index",
+    "pages/audio-favorites/index"
   ],
   "window": {
     "navigationBarTitleText": "实学夜话",
@@ -64,5 +67,6 @@
   ],
   "style": "v2",
   "sitemapLocation": "sitemap.json",
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "requiredBackgroundModes": ["audio"]
 }

@@ -1,14 +1,11 @@
 <view class="page">
-  <view wx:if="{{allowed}}">
-    <text class="eyebrow">校园管理</text>
-    <text class="page-title">音频管理</text>
-    <text class="page-description">珍藏每一次校园发声</text>
-    <view class="card admin-placeholder"><empty-state icon="sound" title="功能正在准备中" description="发布、下架和音频管理即将开放。" /></view>
-    <view wx:if="{{permissionMessage}}" class="notice">{{permissionMessage}}</view>
-    <t-button theme="default" variant="outline" size="large" block bind:tap="onRefreshPermission">重新核验权限</t-button>
+  <view wx:if="{{localExperience}}" class="preview-tag">本地体验 · 仅管理本机示例节目</view>
+  <view wx:if="{{allowed}}"><text class="eyebrow">珍藏每一次校园发声</text><text class="page-title">音频管理</text><t-button theme="primary" block bind:tap="onCreate">新建夜话</t-button>
+    <view class="filters"><button data-status="draft" class="{{status === 'draft' ? 'selected' : ''}}" bindtap="onFilter">草稿</button><button data-status="published" class="{{status === 'published' ? 'selected' : ''}}" bindtap="onFilter">已发布</button><button data-status="offline" class="{{status === 'offline' ? 'selected' : ''}}" bindtap="onFilter">已下架</button></view>
+    <view wx:for="{{items}}" wx:key="_id" class="card audio-manage-item"><text class="section-title">{{item.title}}</text><text class="caption">{{item.speakerName}} · {{item.visibility === 'school' ? '全校可见' : '指定班级'}} · {{item.status === 'published' ? '已发布' : item.status === 'offline' ? '已下架' : '草稿'}}</text><view class="actions"><button data-id="{{item._id}}" bindtap="onPreviewAudio">试听</button><button wx:if="{{item.status !== 'published'}}" data-id="{{item._id}}" bindtap="onEdit">编辑</button><button wx:if="{{item.status !== 'published'}}" data-id="{{item._id}}" data-action="publish" bindtap="onTransition">发布</button><button wx:else data-id="{{item._id}}" data-action="offline" bindtap="onTransition">下架</button><button data-id="{{item._id}}" data-action="delete" bindtap="onTransition">删除</button></view></view>
+    <empty-state wx:if="{{!items.length && !busy}}" icon="sound" title="这个分组还没有夜话" description="新建一份草稿，开始记录校园的声音。" />
+    <view wx:if="{{error || permissionMessage}}" class="notice">{{error || permissionMessage}}</view>
+    <t-button theme="default" block loading="{{busy}}" disabled="{{busy}}" bind:tap="reload">刷新列表</t-button><t-button wx:if="{{cursor}}" theme="default" block disabled="{{busy}}" bind:tap="onLoadMore">加载更多</t-button><t-button theme="default" variant="text" block bind:tap="onStopPreview">停止试听</t-button>
   </view>
-  <view wx:else>
-    <empty-state icon="lock-on" title="{{checking ? '正在核验管理权限' : '需要管理权限'}}" description="{{permissionMessage || '此页面仅向已授权的管理员开放。'}}" />
-    <t-button theme="default" variant="outline" size="large" block bind:tap="onReturn">返回我的</t-button>
-  </view>
+  <view wx:else><empty-state icon="lock-on" title="{{checking ? '正在核验管理权限' : '需要管理权限'}}" description="{{permissionMessage}}" /><t-button theme="default" block bind:tap="onRefreshPermission">重新核验权限</t-button><t-button theme="default" block bind:tap="onReturn">返回我的</t-button></view>
 </view>

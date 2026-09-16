@@ -115,8 +115,8 @@ class MemoryManagement implements ManagementPort {
 }
 
 describe('TASK-102 manifest and initialization', () => {
-  it('defines 13 distinct collections and required uniqueness constraints', () => {
-    expect(new Set(DATABASE_MANIFEST.map((collection) => collection.name)).size).toBe(13);
+  it('defines 15 distinct collections and required uniqueness constraints', () => {
+    expect(new Set(DATABASE_MANIFEST.map((collection) => collection.name)).size).toBe(15);
     for (const [collection, fields] of [
       ['users', ['openid']],
       ['favorites', ['userId', 'audioId']],
@@ -141,14 +141,14 @@ describe('TASK-102 manifest and initialization', () => {
     const management = new MemoryManagement();
     const data = new MemoryData();
     const first = await initializeDatabase(target, management, data);
-    expect(first.collectionsCreated).toBe(13);
+    expect(first.collectionsCreated).toBe(DATABASE_MANIFEST.length);
     expect(first.indexesCreated).toBeGreaterThan(15);
     expect(first.seedsCreated).toBe(8);
     expect(management.events[0]).toBe('deny:storage');
     const firstIndex = management.events.findIndex((event) => event.startsWith('index:'));
     expect(
       management.events.slice(0, firstIndex).filter((event) => event.startsWith('deny:')),
-    ).toHaveLength(14);
+    ).toHaveLength(DATABASE_MANIFEST.length + 1);
     expect(await initializeDatabase(target, management, data)).toEqual({
       collectionsCreated: 0,
       indexesCreated: 0,

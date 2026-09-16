@@ -137,6 +137,8 @@ export interface AudioProgram extends RecordDates {
   publishedBy?: string;
   publishedAt?: Date;
   offlineAt?: Date;
+  audioTicketId?: string;
+  coverTicketId?: string;
 }
 
 export interface PlayProgress extends RecordDates {

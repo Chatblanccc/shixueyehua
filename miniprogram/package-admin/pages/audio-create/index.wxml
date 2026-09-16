@@ -1,14 +1,26 @@
 <view class="page">
+  <view wx:if="{{localExperience}}" class="preview-tag">本地体验 · 上传与发布仅在本机生效</view>
   <view wx:if="{{allowed}}">
-    <text class="eyebrow">校园管理</text>
-    <text class="page-title">发布夜话</text>
-    <text class="page-description">把学校的声音，认真传递</text>
-    <view class="card admin-placeholder"><empty-state icon="sound" title="功能正在准备中" description="音频上传与草稿功能即将开放。只有已授权管理员可以上传和发布夜话。" /></view>
-    <view wx:if="{{permissionMessage}}" class="notice">{{permissionMessage}}</view>
-    <t-button theme="default" variant="outline" size="large" block bind:tap="onRefreshPermission">重新核验权限</t-button>
+    <text class="eyebrow">让学校的声音，妥善抵达</text><text class="page-title">{{audioId ? '编辑夜话' : '发布夜话'}}</text>
+    <view class="card form-card">
+      <text class="field-label">标题 *</text><input id="audio-title" maxlength="120" value="{{title}}" data-field="title" bindinput="onField" disabled="{{busy}}" placeholder="今晚，想聊些什么？" />
+      <text class="field-label">主讲人 *</text><input id="audio-speaker" maxlength="80" value="{{speakerName}}" data-field="speakerName" bindinput="onField" disabled="{{busy}}" placeholder="填写主讲人" />
+      <text class="field-label">主讲人职务</text><input maxlength="80" value="{{speakerTitle}}" data-field="speakerTitle" bindinput="onField" disabled="{{busy}}" placeholder="例如：校长" />
+      <text class="field-label">本期简介</text><textarea maxlength="2000" value="{{description}}" data-field="description" bindinput="onField" disabled="{{busy}}" placeholder="留一段话，邀请大家收听" auto-height />
+    </view>
+    <view class="card form-card"><text class="section-title">音频文件 *</text><text class="caption">MP3 / M4A，最大 50MB，最长 4 小时</text>
+      <text wx:if="{{audio}}" class="file-label">{{audio.name}} · {{audio.size}} 字节 · {{durationLabel}}</text><text wx:elif="{{existingDuration}}" class="file-label">已保存音频 · {{durationLabel}}</text>
+      <t-button theme="default" block disabled="{{busy}}" bind:tap="onChooseAudio">从微信文件选择音频</t-button>
+      <t-button wx:if="{{localExperience}}" id="use-sample-audio" theme="default" variant="outline" block disabled="{{busy}}" bind:tap="onUseSample">使用内置示例音频</t-button>
+      <view class="inline-actions"><t-button size="small" theme="default" disabled="{{busy}}" bind:tap="onPreviewAudio">试听</t-button><t-button size="small" theme="default" bind:tap="onStopPreview">停止试听</t-button></view>
+    </view>
+    <view class="card form-card"><text class="section-title">封面</text><text class="caption">不选择时使用夜话默认封面</text><image wx:if="{{cover}}" src="{{cover.path}}" class="cover-preview" mode="aspectFill" /><t-button theme="default" block disabled="{{busy}}" bind:tap="onChooseCover">选择并压缩封面</t-button></view>
+    <view class="card form-card"><text class="section-title">可见范围</text><radio-group bindchange="onVisibility"><label><radio value="school" checked="{{visibility === 'school'}}" disabled="{{busy}}" />全校可见</label><label><radio value="classes" checked="{{visibility === 'classes'}}" disabled="{{busy}}" />指定班级</label></radio-group><checkbox-group wx:if="{{visibility === 'classes'}}" bindchange="onClasses"><label wx:for="{{classes}}" wx:key="_id"><checkbox value="{{item._id}}" checked="{{item.checked}}" disabled="{{busy}}" />{{item.name}}</label><text wx:if="{{!classes.length}}" class="caption">暂无可选班级，请先建立班级。</text></checkbox-group></view>
+    <view wx:if="{{phase}}" class="notice">{{phase}}<t-button wx:if="{{uploadKind}}" theme="default" size="small" bind:tap="onCancelUpload">取消上传</t-button></view>
+    <view wx:if="{{error || permissionMessage}}" class="notice">{{error || permissionMessage}}</view>
+    <t-button id="save-audio-draft" theme="primary" block loading="{{busy}}" disabled="{{busy || !loaded}}" bind:tap="onSave">保存草稿</t-button>
+    <t-button wx:if="{{saved}}" id="go-audio-manage" theme="default" block bind:tap="onManage">前往音频管理并发布</t-button>
+    <t-button wx:if="{{!loaded}}" theme="default" block bind:tap="loadForm">重试加载表单</t-button>
   </view>
-  <view wx:else>
-    <empty-state icon="lock-on" title="{{checking ? '正在核验管理权限' : '需要管理权限'}}" description="{{permissionMessage || '此页面仅向已授权的管理员开放。'}}" />
-    <t-button theme="default" variant="outline" size="large" block bind:tap="onReturn">返回我的</t-button>
-  </view>
+  <view wx:else><empty-state icon="lock-on" title="{{checking ? '正在核验管理权限' : '需要管理权限'}}" description="{{permissionMessage}}" /><t-button theme="default" block bind:tap="onRefreshPermission">重新核验权限</t-button><t-button theme="default" block bind:tap="onReturn">返回我的</t-button></view>
 </view>

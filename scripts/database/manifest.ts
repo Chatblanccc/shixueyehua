@@ -46,6 +46,8 @@ export const DATABASE_MANIFEST: ReadonlyArray<CollectionDefinition> = [
       index('school_status_published', ['schoolId', 'status', '-publishedAt']),
       index('class_ids', ['classIds']),
       index('deleted_at', ['deletedAt']),
+      index('school_published_cursor', ['schoolId', 'status', 'deletedAt', '-publishedAt', '-_id']),
+      index('school_created_cursor', ['schoolId', 'status', 'deletedAt', '-createdAt', '-_id']),
     ],
   },
   {
@@ -53,6 +55,7 @@ export const DATABASE_MANIFEST: ReadonlyArray<CollectionDefinition> = [
     indexes: [
       index('user_audio_unique', ['userId', 'audioId'], true),
       index('user_updated', ['userId', '-updatedAt']),
+      index('user_progress_cursor', ['userId', 'deletedAt', '-updatedAt', '-_id']),
     ],
   },
   {
@@ -60,8 +63,14 @@ export const DATABASE_MANIFEST: ReadonlyArray<CollectionDefinition> = [
     indexes: [
       index('user_audio_unique', ['userId', 'audioId'], true),
       index('user_created', ['userId', '-createdAt']),
+      index('user_favorite_cursor', ['userId', 'deletedAt', '-createdAt', '-_id']),
     ],
   },
+  {
+    name: 'audio_uploads',
+    indexes: [index('school_cleanup', ['schoolId', 'status', 'grantExpiresAt', '_id'])],
+  },
+  { name: 'audio_upload_quotas', indexes: [] },
   {
     name: 'letters',
     indexes: [

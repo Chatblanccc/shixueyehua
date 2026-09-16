@@ -4,8 +4,11 @@
   "private": true,
   "main": "index.js",
   "dependencies": {
-    "wx-server-sdk": "4.0.2",
-    "lodash.set": "file:vendor/shixue-lodash-set-safe-1.0.1.tgz"
+    "@cloudbase/node-sdk": "3.18.3",
+    "file-type": "22.1.0",
+    "lodash.set": "file:vendor/shixue-lodash-set-safe-1.0.1.tgz",
+    "music-metadata": "11.15.0",
+    "wx-server-sdk": "4.0.2"
   },
   "overrides": {
     "@cloudbase/node-sdk": {

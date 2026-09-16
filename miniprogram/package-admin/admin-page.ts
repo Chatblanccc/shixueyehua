@@ -20,8 +20,19 @@ interface AdminPageOptions {
   superAdminOnly?: boolean;
   destinations?: readonly string[];
 }
-type AdminPage = WechatMiniprogram.Page.Instance<AdminPageData, AdminPageMethods>;
-const guards = new WeakMap<AdminPage, AdminPageGuard>();
+const guards = new WeakMap<object, AdminPageGuard>();
+
+export async function authorizeAdminPage(page: object): Promise<boolean> {
+  return (await guards.get(page)?.requireAdminPage()) ?? false;
+}
+export async function adminPageAction<T>(
+  page: object,
+  action: () => Promise<T>,
+  commit: (result: T) => void,
+): Promise<boolean> {
+  const guard = guards.get(page);
+  return guard ? wrapAdminAction(guard, action, commit) : false;
+}
 
 function assertAdminProfile(profile: LoginResult, superAdminOnly: boolean): void {
   const user = profile.user;

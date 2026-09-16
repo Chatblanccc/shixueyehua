@@ -1,3 +1,22 @@
+import {
+  getDocument,
+  saveDocument,
+  parseAudioDocument,
+  parseProgressDocument,
+  parseFavoriteDocument,
+  parseUploadDocument,
+  parseQuotaDocument,
+  queryAudio,
+  queryPersonal,
+  queryCleanup,
+} from './audio-db';
+import type {
+  AudioQuery,
+  PersonalAudioQuery,
+  AudioUploadRecord,
+  UploadQuota,
+} from './audio-repository';
+import type { AudioProgram, PlayProgress, Favorite } from '../../shared';
 import { isRecord, parseUserProfile, readEnum, readString } from '../../shared';
 import type {
   AdminLog,
@@ -175,6 +194,36 @@ class CloudTransactionRepository implements TransactionRepository {
   findMembership(id: string): Promise<ClassMembership | undefined> {
     return this.find('class_memberships', id, parseMembershipDocument);
   }
+  findAudio(id: string) {
+    return getDocument(this.transaction, 'audio_programs', id, parseAudioDocument);
+  }
+  findProgress(id: string) {
+    return getDocument(this.transaction, 'play_progress', id, parseProgressDocument);
+  }
+  findFavorite(id: string) {
+    return getDocument(this.transaction, 'favorites', id, parseFavoriteDocument);
+  }
+  findUpload(id: string) {
+    return getDocument(this.transaction, 'audio_uploads', id, parseUploadDocument);
+  }
+  findUploadQuota(id: string) {
+    return getDocument(this.transaction, 'audio_upload_quotas', id, parseQuotaDocument);
+  }
+  saveAudio(value: AudioProgram, exists: boolean) {
+    return saveDocument(this.transaction, 'audio_programs', value, exists);
+  }
+  saveProgress(value: PlayProgress, exists: boolean) {
+    return saveDocument(this.transaction, 'play_progress', value, exists);
+  }
+  saveFavorite(value: Favorite, exists: boolean) {
+    return saveDocument(this.transaction, 'favorites', value, exists);
+  }
+  saveUpload(value: AudioUploadRecord, exists: boolean) {
+    return saveDocument(this.transaction, 'audio_uploads', value, exists);
+  }
+  saveUploadQuota(value: UploadQuota, exists: boolean) {
+    return saveDocument(this.transaction, 'audio_upload_quotas', value, exists);
+  }
   async patchUser(id: string, patch: UserPatch): Promise<void> {
     updated(await call(call(this.collection('users'), 'doc', id), 'update', { data: patch }));
   }
@@ -196,6 +245,36 @@ class CloudTransactionRepository implements TransactionRepository {
 export class CloudRepository implements Repository {
   constructor(private readonly database: () => CloudDatabasePort) {}
 
+  findAudio(id: string) {
+    return getDocument(this.database(), 'audio_programs', id, parseAudioDocument);
+  }
+  findProgress(id: string) {
+    return getDocument(this.database(), 'play_progress', id, parseProgressDocument);
+  }
+  findFavorite(id: string) {
+    return getDocument(this.database(), 'favorites', id, parseFavoriteDocument);
+  }
+  findUpload(id: string) {
+    return getDocument(this.database(), 'audio_uploads', id, parseUploadDocument);
+  }
+  listAudio(query: AudioQuery) {
+    return queryAudio(this.database(), query);
+  }
+  listProgress(query: PersonalAudioQuery) {
+    return queryPersonal(
+      this.database(),
+      'play_progress',
+      'updatedAt',
+      query,
+      parseProgressDocument,
+    );
+  }
+  listFavorites(query: PersonalAudioQuery) {
+    return queryPersonal(this.database(), 'favorites', 'createdAt', query, parseFavoriteDocument);
+  }
+  listCleanupUploads(schoolId: string, before: Date, limit: number) {
+    return queryCleanup(this.database(), schoolId, before, limit);
+  }
   async findUserByOpenid(openid: string): Promise<User | undefined> {
     const result: unknown = await this.database()
       .collection('users')

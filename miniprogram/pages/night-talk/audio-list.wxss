@@ -1,0 +1,178 @@
+.audio-page {
+  padding-bottom: calc(60rpx + env(safe-area-inset-bottom));
+}
+.page .audio-card {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 22rpx;
+  margin: 0 0 20rpx;
+  padding: 24rpx;
+  border-radius: 24rpx;
+  background: #fff;
+  color: #213c49;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+}
+.audio-cover {
+  position: relative;
+  overflow: hidden;
+  width: 124rpx;
+  height: 158rpx;
+  flex-shrink: 0;
+  border-radius: 15rpx;
+}
+.audio-cover image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.default-cover {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(130deg, #213c49, #3d5b60);
+  color: #d8bf8f;
+  font-size: 46rpx;
+}
+.default-cover-caption {
+  margin-top: 12rpx;
+  color: #bac7c4;
+  font-size: 15rpx;
+  letter-spacing: 2rpx;
+}
+.audio-card-body {
+  min-width: 0;
+  flex: 1;
+}
+.audio-card-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 28rpx;
+  font-weight: 500;
+  line-height: 1.5;
+  word-break: break-all;
+}
+.audio-speaker {
+  display: block;
+  overflow: hidden;
+  margin-top: 9rpx;
+  color: #7f857d;
+  font-size: 22rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.audio-meta {
+  display: block;
+  margin-top: 6rpx;
+  color: #90958b;
+  font-size: 20rpx;
+}
+.audio-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 13rpx;
+  color: #aa8550;
+}
+.audio-progress-label {
+  font-size: 21rpx;
+}
+.audio-arrow {
+  flex-shrink: 0;
+  color: #a4a79e;
+}
+.progress-track {
+  overflow: hidden;
+  height: 5rpx;
+  margin-top: 12rpx;
+  border-radius: 5rpx;
+  background: #eeeee7;
+}
+.progress-track > view {
+  height: 100%;
+  border-radius: inherit;
+  background: #b49761;
+}
+.audio-empty {
+  margin-top: 32rpx;
+  padding: 12rpx 28rpx 30rpx;
+}
+.list-error {
+  margin-top: 18rpx;
+  padding: 22rpx;
+  border-radius: 16rpx;
+  background: #f0e7df;
+  color: #985e46;
+  text-align: center;
+  font-size: 24rpx;
+}
+.list-error > text {
+  display: block;
+}
+.list-status {
+  padding: 26rpx 0;
+  text-align: center;
+}
+.list-end {
+  display: block;
+  padding: 26rpx 0;
+  color: #999d92;
+  text-align: center;
+  font-size: 21rpx;
+}
+.small-empty {
+  padding: 28rpx 22rpx;
+  color: #838a7f;
+  font-size: 24rpx;
+  line-height: 1.8;
+}
+.page .text-link {
+  display: flex;
+  width: auto;
+  align-items: center;
+  gap: 4rpx;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: #858b80;
+  font-size: 22rpx;
+  font-weight: 400;
+  line-height: 1.6;
+}
+.audio-skeleton {
+  margin-top: 32rpx;
+  padding: 28rpx;
+  border-radius: 26rpx;
+  background: #fff;
+}
+.skeleton-cover {
+  height: 320rpx;
+  border-radius: 20rpx;
+  background: #e6e9e3;
+}
+.skeleton-line {
+  width: 82%;
+  height: 26rpx;
+  margin-top: 25rpx;
+  border-radius: 5rpx;
+  background: #eceee7;
+}
+.skeleton-line.short {
+  width: 55%;
+  margin-bottom: 32rpx;
+}
+.library-intro {
+  margin-bottom: 34rpx;
+}
+.library-empty-action {
+  margin-top: 24rpx;
+}

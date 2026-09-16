@@ -1,3 +1,5 @@
+import { createAudioStorage } from './audio-storage';
+import { DEFAULT_AUDIO_UPLOAD_LIMITS } from '../adminAudioApi/audio';
 import cloud from 'wx-server-sdk';
 import { isRecord } from '../../shared';
 import { consoleLogger } from './audit';
@@ -27,8 +29,33 @@ export function createRuntimeHandler(domain: Domain) {
       const options: { env?: string; throwOnNotFound: boolean } = { throwOnNotFound: false };
       return sdk().database(options);
     }),
+    audioStorage: createAudioStorage(() => {
+      const context: unknown = sdk().getWXContext();
+      if (!isRecord(context) || typeof context.ENV !== 'string' || !context.ENV)
+        throw new Error('Cloud environment is unavailable');
+      return context.ENV;
+    }),
+    audioUploadLimits: {
+      audioMaxBytes: uploadLimit(
+        'SHIXUE_AUDIO_MAX_BYTES',
+        DEFAULT_AUDIO_UPLOAD_LIMITS.audioMaxBytes,
+      ),
+      coverMaxBytes: uploadLimit(
+        'SHIXUE_COVER_MAX_BYTES',
+        DEFAULT_AUDIO_UPLOAD_LIMITS.coverMaxBytes,
+      ),
+    },
     getContext: () => cloud.getWXContext(),
     getEnvironment: () => process.env.APP_ENV,
     logger: consoleLogger,
   });
+}
+
+function uploadLimit(name: string, maximum: number): number {
+  const value = process.env[name];
+  if (value === undefined) return maximum;
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 1 || parsed > maximum)
+    throw new Error('Invalid upload size configuration');
+  return parsed;
 }

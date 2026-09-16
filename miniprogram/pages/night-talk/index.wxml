@@ -1,36 +1,28 @@
-<view wx:if="{{isOnboarded || previewMode}}" class="page">
-  <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
+<import src="audio-list.wxml" />
+<view wx:if="{{isOnboarded || previewMode}}" class="page audio-page">
+  <view wx:if="{{localExperience}}" class="preview-tag">本地体验 · 示例内容与操作仅保存在本机</view>
+  <view wx:if="{{previewMode}}" class="preview-tag">页面预览 · 尚未连接学校</view>
   <view wx:elif="{{currentClass}}" class="preview-tag">{{currentClass.school.name}} · {{currentClass.class.name}}</view>
   <view wx:elif="{{classError}}" class="preview-tag">{{classError}}</view>
-  <view class="header-row">
-    <view>
-      <text class="eyebrow">听见校园</text>
-      <text class="page-title">夜话</text>
-    </view>
-    <view class="header-seal"><view>实学</view><view>夜话</view></view>
-  </view>
+  <view class="header-row"><view><text class="eyebrow">听见校园</text><text class="page-title">夜话</text></view><view class="header-seal"><view>实学</view><view>夜话</view></view></view>
   <text class="page-description">把脚步放慢，听一听成长的声音。</text>
-
-  <view class="night-cover">
-    <view class="cover-moon" aria-hidden="true"></view>
-    <text class="cover-label">本期夜话</text>
-    <text class="cover-title">今晚的夜话<text class="block-line">还在准备中。</text></text>
-    <text class="cover-description">有些话，想慢慢说给你听。</text>
-    <view class="cover-footer">
-      <view class="sound-bars" aria-hidden="true">
-        <view></view><view></view><view></view><view></view><view></view><view></view><view></view>
-      </view>
-      <text>校园音频 · 即将开放</text>
-    </view>
-  </view>
-
-  <view class="section-heading">
-    <text class="section-title">往期夜话</text>
-    <text class="section-note">留住每一次陪伴</text>
-  </view>
-  <view class="card">
-    <empty-state icon="sound" title="一段声音，一份陪伴" description="这里将收录学校发布的夜话。音频收听开放后，就能在这里慢慢听。" />
-  </view>
+  <view wx:if="{{audioList.loading}}" class="audio-skeleton"><view class="skeleton-cover"></view><view class="skeleton-line"></view><view class="skeleton-line short"></view><t-loading theme="circular" text="正在带来校园的声音…" /></view>
+  <view wx:elif="{{audioList.errorMessage}}" class="card audio-empty"><empty-state icon="error-circle" title="这次没能连接上" description="{{audioList.errorMessage}}" /><t-button id="audio-list-retry" custom-style="width:100%;margin-left:0;margin-right:0" block theme="primary" bind:tap="onRetry">重新加载</t-button></view>
+  <block wx:elif="{{featured}}">
+    <button id="featured-audio" class="night-cover" data-id="{{featured._id}}" bindtap="onOpenAudio" aria-label="本期夜话：{{featured.title}}">
+      <image wx:if="{{featured.coverUrl && !failedCovers[featured._id]}}" class="featured-image" src="{{featured.coverUrl}}" mode="aspectFill" data-id="{{featured._id}}" binderror="onCoverError" /><view class="cover-shade"></view><view class="cover-moon"></view><text class="cover-label">本期夜话</text><text class="cover-title">{{featured.title}}</text><text class="cover-description">{{featured.speakerName}}<text wx:if="{{featured.speakerTitle}}"> · {{featured.speakerTitle}}</text></text><text class="featured-meta">{{featured.dateLabel}} · {{featured.durationLabel}}</text><view class="cover-footer"><view class="featured-play"><t-icon name="play" size="30rpx" /><text>{{featured.progressLabel}}</text></view><t-icon wx:if="{{featured.favorite}}" name="heart-filled" size="30rpx" /></view><view wx:if="{{featured.progress}}" class="progress-track featured-progress"><view style="width:{{featured.progressPercent}}%"></view></view>
+    </button>
+    <view class="section-heading"><text class="section-title">往期夜话</text><button class="text-link" bindtap="onOpenHistory">收听历史<t-icon name="chevron-right" size="23rpx" /></button></view>
+    <template is="audio-cards" data="{{programs, failedCovers}}" />
+    <view wx:if="{{!programs.length && !audioList.hasMore}}" class="small-empty">第一段陪伴已经开始，更多夜话会慢慢到来。</view>
+    <template is="audio-list-footer" data="{{audioList}}" />
+  </block>
+  <block wx:else>
+    <view class="night-cover night-cover-empty"><view class="cover-moon"></view><text class="cover-label">本期夜话</text><text class="cover-title">今晚的夜话<text class="block-line">还在准备中。</text></text><text class="cover-description">有些话，想慢慢说给你听。</text><view class="cover-footer"><text>{{previewMode ? '连接学校后，听见真实的校园声音' : '等下一段校园的声音，轻轻抵达'}}</text></view></view>
+    <view class="section-heading"><text class="section-title">往期夜话</text><text class="section-note">留住每一次陪伴</text></view>
+    <view class="card"><empty-state icon="sound" title="一段声音，一份陪伴" description="{{previewMode ? '云服务启用并加入班级后，这里会展示学校发布的音频。当前没有可收听的节目。' : '当前班级还没有可收听的夜话，学校发布后会出现在这里。'}}" /></view>
+  </block>
   <view class="page-footnote">声音有温度 · 成长有回响</view>
+  <mini-player />
 </view>
 <view wx:else class="gate"><t-loading theme="circular" text="正在连接校园…" /></view>

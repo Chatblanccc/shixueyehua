@@ -42,6 +42,9 @@
 
 ## Delivery
 
+- 用户要求无 AppID / 云环境也能操作已开发的业务：每个后续 TASK 同步提供显式标记、仅 dev 可启用、独立本地持久化的体验路径，复用正式页面与 service 契约。
+- 本地体验数据与角色不得进入真实云环境；云请求失败不得自动转为本地成功。体验流程可用与真实平台验收分别记录。
+
 - Work by TASK IDs in `docs/CODEX_TASKS.md`.
 - For every task, list changed files, tests run, and known limitations.
 - Do not claim completion when tests fail or when the flow is only mocked.

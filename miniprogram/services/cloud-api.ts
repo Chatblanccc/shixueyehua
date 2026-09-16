@@ -1,8 +1,11 @@
 import { environment } from '../config/env';
 import { CloudClientError, createCloudClient } from './cloud-client';
+import { localModeEnabled } from './local-mode';
+import { localRepository } from './local.service';
 
 /** One real transport for all domains; unavailable cloud never becomes mock success. */
 export const callCloud = createCloudClient(async (request) => {
+  if (localModeEnabled()) return localRepository().invoke(request);
   if (!environment.cloudConfigured || !environment.envId || !wx.cloud) {
     throw new CloudClientError('NETWORK_ERROR', 'local-cloud-unavailable');
   }

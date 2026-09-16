@@ -34,6 +34,19 @@ if (
   lockedSdk.version !== sdkVersion
 )
   throw new Error('云函数 SDK 锁文件与实际版本不一致。');
+for (const [name, version] of Object.entries(runtimePackage.dependencies)) {
+  if (name === 'lodash.set') continue; // Same vendored archive has a different relative path.
+  const locked: unknown = runtimeLock.packages[`node_modules/${name}`];
+  if (
+    typeof version !== 'string' ||
+    !/^\d+\.\d+\.\d+$/.test(version) ||
+    dependencies[name] !== version ||
+    lockedRoot.dependencies[name] !== version ||
+    !isRecord(locked) ||
+    locked.version !== version
+  )
+    throw new Error(`云函数依赖 ${name} 未精确对齐。`);
+}
 const outRoot = 'dist/cloudfunctions';
 await rm(outRoot, { recursive: true, force: true });
 for (const name of functions) {
@@ -46,7 +59,7 @@ for (const name of functions) {
     platform: 'node',
     format: 'cjs',
     target: 'node22',
-    external: ['wx-server-sdk'],
+    external: Object.keys(runtimePackage.dependencies),
     sourcemap: false,
     metafile: true,
   });

@@ -2,6 +2,7 @@
   <view wx:if="{{previewMode}}" class="preview-tag">页面预览</view>
   <text class="eyebrow">与自己，相处片刻</text>
   <text class="page-title">我的</text>
+  <view wx:if="{{localExperience}}" class="card"><text class="preview-tag">本地体验 · 数据仅在本机</text><t-button id="switch-demo-role" theme="default" block bind:tap="onSwitchExperienceRole">{{isAdmin ? '切换为听众体验' : '切换为管理员体验'}}</t-button><t-button theme="default" variant="text" block bind:tap="onResetExperience">重置体验数据</t-button></view>
   <view class="profile-header">
     <view wx:if="{{user}}" class="preset-avatar preset-{{user.avatarPreset || 'moon'}}"><text>{{user.avatarPreset === 'book' ? '书' : user.avatarPreset === 'bamboo' ? '竹' : '月'}}</text></view>
     <view wx:else class="avatar"><t-icon name="user" size="62rpx" /></view>
@@ -19,12 +20,13 @@
 
   <view class="section-heading"><text class="section-title">我的珍藏</text></view>
   <view class="card menu-list">
-    <view class="menu-row"><view class="menu-label"><t-icon name="heart" size="38rpx" /><text>我的收藏</text></view><text class="soon-label">即将开放</text></view>
-    <view class="menu-row"><view class="menu-label"><t-icon name="time" size="38rpx" /><text>收听历史</text></view><text class="soon-label">即将开放</text></view>
+    <button id="profile-favorites-entry" class="menu-row interactive-row" bindtap="onOpenFavorites"><view class="menu-label"><t-icon name="heart" size="38rpx" /><text>我的收藏</text></view><t-icon name="chevron-right" size="28rpx" /></button>
+    <button id="profile-history-entry" class="menu-row interactive-row" bindtap="onOpenHistory"><view class="menu-label"><t-icon name="time" size="38rpx" /><text>收听历史</text></view><t-icon name="chevron-right" size="28rpx" /></button>
     <view class="menu-row"><view class="menu-label"><t-icon name="mail" size="38rpx" /><text>我的家书</text></view><text class="soon-label">即将开放</text></view>
   </view>
   <view wx:if="{{isAdmin}}" class="admin-entry"><t-button custom-style="width:100%;margin-left:0;margin-right:0" theme="default" size="large" block bind:tap="onOpenAdmin">进入管理中心</t-button></view>
   <view class="about-card"><text class="about-name">实学夜话</text><text class="caption">让学校的声音被认真听见，<text class="block-line">让家校之间的表达更加真诚。</text></text></view>
   <view class="page-footnote">听见校园 · 写给家人</view>
+  <mini-player />
 </view>
 <view wx:else class="gate"><t-loading theme="circular" text="正在连接校园…" /></view>

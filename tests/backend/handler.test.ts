@@ -89,11 +89,11 @@ describe('cloud boundary', () => {
     });
   });
 
-  it('returns explicit unfinished errors after guarding registered business actions', async () => {
+  it('requires a valid class for audio and guards privileged actions', async () => {
     const repository = new MemoryRepository([user({ openid: 'test_context_openid' })]);
     expect(await setup('audioApi', repository).handler({ action: 'list' })).toMatchObject({
       success: false,
-      error: { code: 'NOT_IMPLEMENTED' },
+      error: { code: 'CLASS_NOT_AVAILABLE' },
     });
     expect(
       await setup('adminAudioApi', repository).handler({
